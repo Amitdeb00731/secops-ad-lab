@@ -1,0 +1,73 @@
+# ---- Secrets and credentials (never commit) ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+*.crt
+*.kdbx
+id_rsa*
+id_ed25519*
+# Named credential files (patterns kept narrow so detection docs like password-spray.md still commit)
+credentials.*
+secrets.*
+passwords.*
+creds.*
+*.secret
+lab-creds/
+private/
+
+# ---- VM images, disks and ISOs ----
+*.iso
+*.ova
+*.ovf
+*.vmdk
+*.vdi
+*.vhd
+*.vhdx
+*.qcow2
+*.vmx
+*.vmsn
+*.vmem
+*.nvram
+*.sav
+*.box
+.vagrant/
+packer_cache/
+output-*/
+
+# ---- Raw logs, captures and evidence dumps (export sanitised samples instead) ----
+*.pcap
+*.pcapng
+*.evtx
+*.etl
+*.dmp
+raw-logs/
+evidence-raw/
+
+# ---- Archives and large binaries ----
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.exe
+*.msi
+
+# ---- OS and editor clutter ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.venv/
+venv/
