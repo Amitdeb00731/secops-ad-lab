@@ -1,0 +1,7 @@
+"SamAccountName","Title","OU","Groups"
+"pshah","Analyst","OU=Finance,OU=Staff,OU=CORP,DC=corp,DC=lab","GG-Finance"
+"treed","Ops Associate","OU=Operations,OU=Staff,OU=CORP,DC=corp,DC=lab","GG-Operations"
+"sokafor","IT Engineer","OU=IT,OU=Staff,OU=CORP,DC=corp,DC=lab",""
+"adm-t2-sokafor","Workstation Admin","OU=Tier2,OU=CORP,DC=corp,DC=lab","GG-Workstation-Admins"
+"adm-t0-sokafor","Domain Admin","OU=Tier0,OU=CORP,DC=corp,DC=lab","Domain Admins"
+"svc-sql","Service Account","OU=Service Accounts,OU=CORP,DC=corp,DC=lab",""

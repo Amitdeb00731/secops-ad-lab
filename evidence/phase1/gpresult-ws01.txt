@@ -1,0 +1,36 @@
+# gpresult /r /scope computer   (WS01, run as CORP\adm-t2-sokafor, 2026-10-24 10:51)
+
+OS Configuration:            Member Workstation
+OS Version:                  10.0.26300
+Site Name:                   Default-First-Site-Name
+
+COMPUTER SETTINGS
+------------------
+    CN=WS01,OU=Workstations,OU=CORP,DC=corp,DC=lab
+    Last time Group Policy was applied: 24/10/2026 at 10:51:20
+    Group Policy was applied from:      DC01.corp.lab
+    Domain Name:                        CORP
+
+    Applied Group Policy Objects
+    -----------------------------
+        GPO-Workstation-LocalAdmins
+        GPO-Audit-Baseline
+        Default Domain Policy
+
+    The following GPOs were not applied because they were filtered out
+    -------------------------------------------------------------------
+        Local Group Policy
+            Filtering:  Not Applied (Empty)
+
+    The computer is a part of the following security groups
+    -------------------------------------------------------
+        BUILTIN\Administrators
+        Everyone
+        BUILTIN\Users
+        NT AUTHORITY\NETWORK
+        NT AUTHORITY\Authenticated Users
+        This Organization
+        WS01$
+        Domain Computers
+        Authentication authority asserted identity
+        System Mandatory Level

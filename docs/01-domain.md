@@ -13,7 +13,7 @@
 | Check | How |
 | --- | --- |
 | Virtualisation enabled | Task Manager → Performance → CPU → "Virtualization: Enabled" |
-| Hypervisor installed | VirtualBox 7.x (free). If Hyper-V or WSL2 is on, VirtualBox still works but slower; note it in `lab-notes.md` |
+| Hypervisor installed | VMware Workstation Pro (free for personal use) |
 | Disk | ~150 GB free on the drive holding VMs |
 | ISOs downloaded | Windows Server 2022 Evaluation and Windows 11 Enterprise Evaluation from the Microsoft Evaluation Center |
 
@@ -23,31 +23,52 @@ Create `lab-notes.md` in the repo root now. Every time something breaks, add one
 
 ## 1. Network plan
 
-Use a VirtualBox **NAT Network** while building (VMs can reach the internet for updates and downloads, but your home network can't reach them). Before Phase 4 test runs, switch every VM to an **Internal Network** with no internet route.
-
-VirtualBox → File → Tools → Network Manager → NAT Networks → Create:
-- Name: `corp-lab`
-- IPv4 prefix: `10.10.10.0/24`
-- **Untick DHCP** (we use static addresses and the DC will provide DNS)
+All VMs use the VMware network **VMnet10** created in Step 1 (NAT, `10.10.10.0/24`, DHCP off, gateway `10.10.10.2`). While building, VMs can reach the internet for updates; before Phase 4 test runs, VMnet10 is switched to **Host-only** so there is no internet route.
 
 | Host | IP | DNS server | Gateway |
 | --- | --- | --- | --- |
-| DC01 | 10.10.10.10 | 127.0.0.1 | 10.10.10.1 |
-| SIEM01 | 10.10.10.20 | 10.10.10.10 | 10.10.10.1 |
-| WS01 | 10.10.10.101 | 10.10.10.10 | 10.10.10.1 |
+| DC01 | 10.10.10.10 | 127.0.0.1 | 10.10.10.2 |
+| SIEM01 | 10.10.10.20 | 10.10.10.10 | 10.10.10.2 |
+| WS01 | 10.10.10.101 | 10.10.10.10 | 10.10.10.2 |
 
 Domain name: **`corp.lab`** (NetBIOS: `CORP`). Never use a real domain you don't own.
 
-**Evidence:** screenshot of the NAT Network settings. Add the table above to the README if it changes.
+**Evidence:** screenshot of the VMnet10 settings. Add the table above to the README if it changes.
 
 ---
 
 ## 2. Build DC01
 
-### 2.1 Create the VM
-- 3 GB RAM, 2 vCPU, 60 GB dynamic disk, network: NAT Network `corp-lab`.
-- Install Windows Server 2022 **Standard Evaluation (Desktop Experience)**.
-- Install VirtualBox Guest Additions, then take snapshot **`DC01-clean-os`**.
+### 2.1 Create the VM (VMware Workstation Pro)
+
+**File → New Virtual Machine → Custom (advanced)**, then:
+
+| Wizard page | Choose |
+| --- | --- |
+| Hardware compatibility | Default (latest) |
+| Install from | **I will install the operating system later** (avoids VMware "Easy Install", which picks settings for you) |
+| Guest OS | Microsoft Windows → **Windows Server 2022** |
+| Name / location | `DC01` → `E:\VMs\DC01` |
+| Firmware | **UEFI** (leave Secure Boot ticked) |
+| Processors | 1 processor, **2 cores** |
+| Memory | **3072 MB** |
+| Network | **Custom → VMnet10** |
+| I/O controller / disk type | Defaults (LSI Logic SAS / NVMe) |
+| Disk | Create new, **60 GB**, do **not** allocate now, store as a **single file** |
+
+Before powering on: **Edit virtual machine settings → CD/DVD → Use ISO image** → the Server 2022 ISO in `E:\ISOs`, and tick **Connect at power on**. Remove the **Sound Card** and **Printer** (not needed, saves resources).
+
+Power on and press a key when you see *"Press any key to boot from CD or DVD"* (if you miss it, VM → Power → Restart Guest and try again).
+
+**Windows Setup:**
+1. Language/keyboard: English (United Kingdom) → **Install now**.
+2. Edition: **Windows Server 2022 Standard Evaluation (Desktop Experience)**. Not the plain "Standard Evaluation", which is Server Core with no GUI.
+3. Accept licence → **Custom: Install Windows only** → select the 60 GB drive → Next.
+4. Set the local **Administrator** password (store it in your password manager as `DC01 local admin`).
+
+After first login: **VM → Install VMware Tools** → open the D: drive in File Explorer → run `setup.exe` → Typical → reboot.
+
+Shut down and take snapshot **`DC01-clean-os`** (VM → Snapshot → Take Snapshot).
 
 ### 2.2 Base configuration (PowerShell as Administrator)
 
@@ -57,11 +78,20 @@ Rename-Computer -NewName "DC01" -Restart
 ```
 After reboot:
 ```powershell
-$if = (Get-NetAdapter | Where-Object Status -eq 'Up').Name
-New-NetIPAddress -InterfaceAlias $if -IPAddress 10.10.10.10 -PrefixLength 24 -DefaultGateway 10.10.10.1
-Set-DnsClientServerAddress -InterfaceAlias $if -ServerAddresses 127.0.0.1
+$idx = (Get-NetAdapter | Where-Object Status -eq 'Up').ifIndex   # blank = adapter not connected in VMware
+New-NetIPAddress -InterfaceIndex $idx -IPAddress 10.10.10.10 -PrefixLength 24 -DefaultGateway 10.10.10.2
+Set-DnsClientServerAddress -InterfaceIndex $idx -ServerAddresses 127.0.0.1
 Set-TimeZone -Id "GMT Standard Time"
 ```
+
+Check the network before going further:
+```powershell
+ping 10.10.10.2        # VMware NAT gateway: should reply
+ping 1.1.1.1           # internet: should reply
+```
+If either fails, check the VM's network adapter is **Custom → VMnet10** and that the gateway is `.2`. Log it in `lab-notes.md`.
+
+Run **Windows Update** now (Settings → Windows Update) and reboot until no more updates are offered. Patching before promotion avoids a lot of odd errors.
 
 ### 2.3 Promote to domain controller
 
@@ -223,41 +253,206 @@ Take snapshot **`DC01-phase1-ous-users-gpo`**.
 
 ## 6. Build WS01 and join the domain
 
-### 6.1 VM
-- 4 GB RAM, 2 vCPU, 64 GB disk, NAT Network `corp-lab`.
-- Install Windows 11 Enterprise Evaluation with a **local** account (e.g. `localadmin`).
-- Snapshot **`WS01-clean-os`**.
+**Goal:** a Windows 11 workstation that belongs to `corp.lab`, receives your GPOs, and gives the Tier 2 admin group local admin rights.
+**Why it matters:** this is the "user's laptop" in your story. In Phase 4 it's where simulated attacks start, so its logs are what your detections are built on.
+**Time:** 1 to 2 hours (mostly the install and updates).
 
-### 6.2 Network and join (PowerShell as Administrator)
+Make sure **DC01 is powered on** for the whole of this step. WS01 needs it for DNS and to join the domain.
+
+---
+
+### 6.1 Create the VM
+
+**File → New Virtual Machine → Custom (advanced) → Next**, then:
+
+| Wizard page | Choose | Why |
+| --- | --- | --- |
+| Hardware compatibility | Default (latest) | Newest virtual hardware, needed for TPM support |
+| Install from | **I will install the operating system later** | Stops VMware "Easy Install" from auto-creating accounts and settings you don't control |
+| Guest OS | Microsoft Windows → **Windows 11 x64** | Tells VMware to offer the Windows 11 requirements (TPM, Secure Boot) |
+| Encryption | **Only the files needed to support a TPM are encrypted** → set a password → tick *Remember the password on this machine* | Windows 11 refuses to install without a TPM 2.0 chip. VMware adds a virtual one, and VMware requires that it's encrypted. Save this password in your password manager as `WS01 VM encryption` |
+| Name / location | `WS01` → `E:\VMs\WS01` | Keeps VM files out of the git repo |
+| Firmware | **UEFI**, Secure Boot ticked | Also a Windows 11 requirement |
+| Processors | 1 processor, **2 cores** | Enough for a desktop that runs Sysmon and an agent |
+| Memory | **4096 MB** | Windows 11's minimum; fits the 16 GB budget |
+| Network | **Use a custom network → VMnet10** | Same network as DC01, so it can find the domain |
+| I/O controller / disk type | Defaults | |
+| Disk | Create new, **64 GB**, don't allocate now, **single file** | 64 GB is Windows 11's minimum. "Don't allocate now" means it only uses disk as it fills |
+
+Click **Finish**, then **Edit virtual machine settings**:
+- **CD/DVD** → Use ISO image → the Windows 11 Enterprise ISO in `E:\ISOs` → tick **Connect at power on**.
+- Select **Sound Card** → Remove. Select **Printer** → Remove. (Not needed, and fewer devices means less noise in the logs.)
+- Check **Network Adapter** shows **Custom (VMnet10)** with **Connect at power on** ticked. (This is what caught you on DC01.)
+
+---
+
+### 6.2 Install Windows 11
+
+1. **Power on**, click into the window, and press a key at *"Press any key to boot from CD or DVD"*. If you miss it, use VM → Power → Restart Guest.
+2. **Language:** English (United Kingdom), keyboard United Kingdom → Next → **Install now** (or *Install Windows 11*).
+3. **Edition:** if asked, choose **Windows 11 Enterprise Evaluation**. The eval ISO usually skips this page.
+4. Accept the licence → **Custom: Install Windows only** → select the 64 GB drive → Next. Wait for it to copy and reboot a few times.
+5. **Out-of-box setup:**
+   - Region: **United Kingdom**, keyboard: **United Kingdom**, skip the second keyboard.
+   - **Network:** because VMnet10 has no DHCP, Windows finds no internet. That's expected. Choose **I don't have internet** or **Continue with limited setup** if offered.
+   - **Account:** if asked *"How would you like to set up this device?"*, choose **Set up for work or school**, then **Sign-in options → Domain join instead**. Either path leads to creating a **local account**.
+   - Name: `localadmin`. Password: a new strong one (password manager: `WS01 localadmin`). Answer the three security questions with nonsense and store them too.
+   - Privacy settings: turn everything **off**. Less telemetry means less noise in your SIEM later.
+
+**Why a local account first?** A machine can only join a domain once it's running. `localadmin` is the bootstrap account. After the join you'll log in with domain accounts, and `localadmin` becomes a break-glass account. (In Phase 3, LAPS will manage its password.)
+
+---
+
+### 6.3 VMware Tools and first snapshot
+
+1. **VM → Install VMware Tools**. Open **File Explorer → DVD Drive (D:)** → run `setup64.exe` (or `setup.exe`) → **Typical** → Finish → **reboot**.
+   *Why:* it gives proper display resolution, copy/paste and drag-and-drop between laptop and VM, and keeps the clock synced.
+2. Shut down WS01 (Start → Power → Shut down).
+3. **VM → Snapshot → Take Snapshot** → name `WS01-clean-os`.
+   *Why:* if the domain join or a GPO goes wrong, you roll back here in seconds instead of reinstalling.
+
+Power WS01 back on and log in as `localadmin`.
+
+---
+
+### 6.4 Network settings
+
+Open **PowerShell as Administrator** (Start → type *PowerShell* → right-click → Run as administrator).
+
+**a) Find the adapter.**
+```powershell
+Get-NetAdapter
+```
+You should see `Ethernet0` with Status **Up**. Note its **ifIndex** number. Below, replace `6` with yours if it's different.
+If Status isn't Up, fix the VM's network adapter (VM → Settings → Network Adapter → Connected + VMnet10).
+
+**b) Give WS01 a fixed address, and point DNS at DC01.**
+```powershell
+New-NetIPAddress -InterfaceIndex 6 -IPAddress 10.10.10.101 -PrefixLength 24 -DefaultGateway 10.10.10.2
+Set-DnsClientServerAddress -InterfaceIndex 6 -ServerAddresses 10.10.10.10
+Set-TimeZone -Id "GMT Standard Time"
+```
+*Why DNS = 10.10.10.10:* in a domain, computers find the domain controller by asking DNS ("where is the DC for corp.lab?"). If WS01 asks your home router or Google instead, the join fails. This is the most common AD lab mistake.
+
+**c) Test.**
+```powershell
+ping 10.10.10.10          # DC01 should reply
+Resolve-DnsName corp.lab  # should return 10.10.10.10
+nltest /dsgetdc:corp.lab  # should name DC01.corp.lab
+ping 1.1.1.1              # internet via the VMware NAT gateway
+```
+If `Resolve-DnsName` fails, the DNS setting or DC01 is the problem. Check DC01 is on, and run `ipconfig /all` on WS01.
+
+**d) Patch.** Settings → Windows Update → *Check for updates*. Install everything and reboot until nothing's left. *Why:* domain joins and GPOs behave better on a patched build, and an unpatched machine skews later hardening scores.
+
+---
+
+### 6.5 Join the domain
 
 ```powershell
-$if = (Get-NetAdapter | Where-Object Status -eq 'Up').Name
-New-NetIPAddress -InterfaceAlias $if -IPAddress 10.10.10.101 -PrefixLength 24 -DefaultGateway 10.10.10.1
-Set-DnsClientServerAddress -InterfaceAlias $if -ServerAddresses 10.10.10.10
-
-Resolve-DnsName corp.lab   # must return 10.10.10.10 before you continue
-
 Add-Computer -DomainName corp.lab -NewName WS01 `
   -OUPath "OU=Workstations,OU=CORP,DC=corp,DC=lab" `
   -Credential CORP\adm-t0-sokafor -Restart
 ```
+A password box pops up: enter the **adm-t0-sokafor** password. The VM restarts.
 
-> Joining with a Tier 0 account is a one-off for the lab. Note in the write-up that in production you'd delegate "join computer" rights on the Workstations OU to a Tier 2 group instead.
+What each part does:
+- `-NewName WS01` renames the PC and joins it in one reboot.
+- `-OUPath` puts the computer straight into the **Workstations** OU, so workstation GPOs apply. Without it, it lands in the default `Computers` container, where you can't link GPOs.
+- `-Credential` is the account allowed to add computers to the domain.
 
-### 6.3 Workstation admin rights
-On DC01, create `GPO-Workstation-LocalAdmins` linked to the Workstations OU: *Computer Configuration → Preferences → Control Panel Settings → Local Users and Groups* → add `CORP\GG-Workstation-Admins` to the local **Administrators** group.
+> **For the write-up:** using a Tier 0 (domain admin) account to join a workstation breaks the tier model, because you just typed a domain admin password on a workstation. In production you'd delegate "join computer" rights on the Workstations OU to a Tier 2 group instead. Note it as a known lab shortcut.
 
-On WS01:
+**Check on DC01** (PowerShell):
+```powershell
+Get-ADComputer WS01 | Select Name, DistinguishedName
+```
+It should show `CN=WS01,OU=Workstations,OU=CORP,DC=corp,DC=lab`.
+
+---
+
+### 6.6 Give Tier 2 admins local admin on workstations (on DC01)
+
+**Goal:** members of `GG-Workstation-Admins` (i.e. `adm-t2-sokafor`) are local administrators on every workstation, and nobody else is added by hand.
+
+1. On DC01 run `gpmc.msc`.
+2. Expand Forest → Domains → corp.lab → CORP → right-click **Workstations** → **Create a GPO in this domain, and Link it here…** → name `GPO-Workstation-LocalAdmins` → OK.
+3. Right-click the new GPO → **Edit**.
+4. Go to **Computer Configuration → Preferences → Control Panel Settings → Local Users and Groups**.
+5. Right-click in the right pane → **New → Local Group**, and set:
+   - Action: **Update**
+   - Group name: pick **Administrators (built-in)** from the drop-down
+   - Leave both "Delete all member…" boxes **unticked**
+   - **Members → Add…** → type `CORP\GG-Workstation-Admins` → Action **Add to this group** → OK
+6. OK, then close the editor.
+
+*Why Group Policy and not adding the user by hand:* it's repeatable (every new workstation gets it automatically), auditable (one place to review), and it uses a **group**, so access is granted by changing membership in AD rather than touching each PC. That's the standard bank-audit answer to "how do you control local admin rights?"
+
+---
+
+### 6.7 Verify on WS01
+
+**Restart WS01 first.** Computer GPOs apply at boot, and this is what makes `adm-t2-sokafor` a local admin. Then log in to WS01 as **CORP\adm-t2-sokafor**: on the login screen choose **Other user**, then type `CORP\adm-t2-sokafor`. Open PowerShell **as administrator**:
+
 ```powershell
 gpupdate /force
-gpresult /r /scope computer      # confirm the three GPOs applied
+gpresult /r /scope computer
 ```
+Under **Applied Group Policy Objects** you should see:
+- `Default Domain Policy`
+- `GPO-Audit-Baseline`
+- `GPO-Workstation-LocalAdmins`
 
-Log in as `CORP\pshah` once (creates a user profile, which makes later activity realistic).
+```powershell
+net localgroup Administrators
+```
+It should list `CORP\GG-Workstation-Admins`.
 
-Snapshot **`WS01-domain-joined`**.
+```powershell
+auditpol /get /subcategory:"Process Creation"
+```
+It should say **Success**, which proves the audit GPO reached the workstation.
 
-**Evidence:** `gpresult` output saved as `evidence/phase1-gpresult.txt` (check that nothing sensitive is in it), and a screenshot of WS01 in the Workstations OU.
+Save the evidence:
+```powershell
+New-Item -ItemType Directory C:\export -Force
+gpresult /r /scope computer > C:\export\phase1-gpresult.txt
+```
+Open it and check there's nothing sensitive, then drag it to `evidence\` in your repo.
+
+**Create a normal user profile:** sign out, then log in once as **CORP\pshah**. This creates her profile, so WS01 looks like a real user's laptop in later phases. Then sign out.
+
+> Note: Windows 11's firewall blocks ping *to* WS01 by default, so `ping 10.10.10.101` from DC01 may fail. That's normal; leave the firewall on.
+
+---
+
+### 6.8 Snapshots and commit
+
+1. Shut down WS01 → snapshot **`WS01-domain-joined`**.
+2. On DC01, export the new GPO:
+   ```powershell
+   Get-GPOReport -Name "GPO-Workstation-LocalAdmins" -ReportType Html -Path C:\export\GPO-Workstation-LocalAdmins.html
+   ```
+   Copy it to `config\gpo\`.
+3. Take screenshots: WS01 inside the Workstations OU (Active Directory Users and Computers on DC01), and the `gpresult` output.
+4. Commit and push:
+   ```bash
+   cd "/e/cyber portfolio/secops-ad-lab"
+   git add -A
+   git commit -m "Phase 1: WS01 joined to corp.lab, workstation admin GPO"
+   git push
+   ```
+
+**Step 6 checklist**
+- [ ] WS01 created with TPM, UEFI, 4 GB RAM, VMnet10
+- [ ] Windows 11 installed, VMware Tools, patched
+- [ ] IP 10.10.10.101, DNS 10.10.10.10, `nltest` finds DC01
+- [ ] Joined `corp.lab`, sitting in the Workstations OU
+- [ ] `GPO-Workstation-LocalAdmins` working (`net localgroup Administrators` shows the group)
+- [ ] `gpresult` shows all three GPOs
+- [ ] pshah profile created
+- [ ] Snapshots `WS01-clean-os` and `WS01-domain-joined`
+- [ ] Evidence committed and pushed
 
 ---
 
@@ -276,24 +471,45 @@ Then generate a test event: on WS01, sign in with a wrong password for `treed` t
 
 ---
 
-## 8. Write-up section (fill in, keep it short)
+## 8. Phase 1 write-up
 
-**What I built:** a single-forest AD domain (`corp.lab`) with a tiered OU design, X users, Y groups, three GPOs and one domain-joined workstation.
+### What I built
+A single-forest Active Directory domain, `corp.lab`, on Windows Server 2022, with:
+- an OU structure that mirrors a small bank team (Finance, Operations, IT) plus separate OUs for each admin tier, service accounts, workstations and servers
+- 6 accounts: 3 staff, 2 separate admin accounts for the IT engineer (Tier 0 and Tier 2), and 1 service account
+- 3 role groups: `GG-Finance`, `GG-Operations`, `GG-Workstation-Admins`
+- 3 Group Policies: password and lockout, audit baseline, and workstation local admins ([settings](../config/gpo/README.md))
+- 1 domain-joined Windows 11 workstation, `WS01`, receiving all three policies
 
-**Who can do what:**
+Evidence: [validation](../evidence/phase1/validation.md) · [identity inventory](../config/identity-inventory.csv) · [gpresult](../evidence/phase1/gpresult-ws01.txt)
 
-| Account | Tier | Can administer | Cannot |
-| --- | --- | --- | --- |
-| adm-t0-sokafor | 0 | Domain, DCs | Should never log on to workstations |
-| adm-t2-sokafor | 2 | Workstations (local admin via GPO) | Servers, DCs |
-| sokafor | none | Own mailbox, files | Any admin task |
-| svc-sql | service | SQL service only | Interactive logon (restrict in Phase 3) |
+### Who can do what
 
-**Design decisions and trade-offs:** 3 or 4 bullets (e.g. why tiering, why 14-character passwords, why audit settings now rather than later).
+| Account | Tier | Can administer | Cannot | Evidence |
+| --- | --- | --- | --- | --- |
+| `adm-t0-sokafor` | 0 | Domain and DCs (Domain Admins) | Should never log on to workstations | Domain Admins membership |
+| `adm-t2-sokafor` | 2 | Workstations, via `GG-Workstation-Admins` and GPO | Servers, DCs | `net localgroup Administrators` on WS01 |
+| `sokafor` | none | Own files | Any admin task | Not in any admin group |
+| `pshah`, `treed` | none | Own files | Any admin task | `whoami /groups` shows no Administrators |
+| `svc-sql` | service | SQL service only | Interactive logon (to restrict in Phase 3) | Has an SPN |
 
-**What broke and how I fixed it:** link to `lab-notes.md`.
+### Design decisions and trade-offs
+- **Tiered admin accounts.** The IT engineer has a daily account plus one admin account per tier. A stolen workstation session only exposes low-privilege credentials, and Tier 0 credentials are never meant to touch a workstation. Trade-off: more accounts to manage.
+- **Rights through groups and GPO, not by hand.** Local admin on workstations comes from one AD group, applied by one GPO. It's repeatable on every new machine and reviewable in one place, which is the evidence an auditor asks for.
+- **14-character minimum, no forced expiry.** Follows UK NCSC guidance: length beats complexity, and forced resets push users to predictable patterns. Lockout at 10 attempts slows guessing without handing attackers an easy way to lock users out.
+- **Audit logging configured before anything else is built.** Logon, Kerberos, account-change and process-creation (with command line) events are on from day one, so every later phase is observable. You can't detect what you didn't log.
 
-**Why a bank cares:** one paragraph. AD is the control plane for almost every internal service. Tiered admin and complete audit logging are standard findings in audits and regulator-led testing (e.g. CBEST). Without them, a single compromised workstation can become a domain-wide outage of important business services.
+### Known gaps and lab shortcuts
+- WS01 was joined with the Tier 0 account. That puts a domain admin credential on a workstation. In production, "join computer" rights on the Workstations OU would be delegated to a Tier 2 group.
+- `svc-sql` has a deliberately weak password and an SPN. It's left that way on purpose to test Kerberoasting detection in Phase 4, and would be a finding in a real review.
+- No LAPS yet: the local `localadmin` password is set by hand. It's planned for Phase 3 hardening.
+- A single domain controller, so there's no redundancy. Acceptable for a lab; a bank would run at least two per site.
+
+### What broke and how I fixed it
+Nine issues, from adapter binding and clock skew to a transient Netlogon error during the domain join. See [lab-notes.md](../lab-notes.md). The most useful lesson: a 9-hour clock offset on the DC would have broken Kerberos for any client more than 5 minutes out, and made every SIEM timeline wrong.
+
+### Why a bank cares
+Active Directory is the control plane for almost every internal service in a bank: email, file shares, trading and payments applications, remote access. If an attacker gets domain admin, every important business service is exposed at once. Tiered administration and complete audit logging are standard expectations in internal audit and in regulator-led testing such as CBEST, and they underpin the UK operational resilience requirement to stay within impact tolerances for important business services. Phase 1 puts both in place, and the evidence shows they work.
 
 ---
 

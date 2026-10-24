@@ -1,6 +1,6 @@
 # SecOps AD Lab: detecting identity attacks across a corporate domain
 
-> **Status: in progress.** Domain build underway. See [Roadmap](#roadmap) for what is done and what is next.
+> **Status: Phase 1 complete (domain, tiering, GPOs, audit logging).** Phase 2 (Sysmon + Wazuh) next. See [Roadmap](#roadmap).
 
 ## The business problem
 
@@ -45,7 +45,13 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 
 ## Results
 
-_To be filled in as each phase completes._
+### Phase 1: domain (complete)
+- `corp.lab` forest with tiered admin model: only `Administrator` and the dedicated Tier 0 account hold Domain Admins.
+- Workstation local admin granted by AD group + GPO, verified on WS01; standard users confirmed non-admin.
+- Audit baseline live on DC and workstation; failed Kerberos logons (Event 4771, code `0x18`) captured with user and source IP.
+- Evidence: [validation](evidence/phase1/validation.md) · [GPO settings](config/gpo/README.md) · [write-up](docs/01-domain.md#8-phase-1-write-up) · [lab notes](lab-notes.md)
+
+### Detection results (Phase 4)
 
 | ATT&CK technique | Simulated with | Result | Detection |
 | --- | --- | --- | --- |
@@ -57,7 +63,7 @@ _To be filled in as each phase completes._
 
 ## Roadmap
 
-- [ ] **Phase 1: Domain.** DC, OUs, tiered users and groups, workstation joined, baseline GPOs. → [docs/01-domain.md](docs/01-domain.md)
+- [x] **Phase 1: Domain.** DC, OUs, tiered users and groups, workstation joined, baseline GPOs. → [docs/01-domain.md](docs/01-domain.md)
 - [ ] **Phase 2: Visibility.** Sysmon, advanced audit policy, Wazuh agents, telemetry coverage table. → [docs/02-telemetry.md](docs/02-telemetry.md)
 - [ ] **Phase 3: Hardening.** CIS baseline scan, remediation, before/after score. → [docs/03-hardening.md](docs/03-hardening.md)
 - [ ] **Phase 4: Simulate and detect.** Five ATT&CK techniques, Wazuh and Sigma rules, coverage matrix. → [docs/04-detections.md](docs/04-detections.md)
