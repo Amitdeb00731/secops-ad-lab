@@ -62,4 +62,4 @@ WS01, policy value delivered:
 PS> Get-ItemProperty "HKLM:\Software\Policies\Microsoft\Windows\EventLog\Security"
 MaxSize : 524288
 ```
-**Proves:** the 512 MB setting (the value is in KB) reaches the workstation through Group Policy. `Get-WinEvent -ListLog` still shows the size the log was created with; the policy value is the one the Event Log service enforces. Event Viewer shows the size greyed out as policy-managed.
+**Proves:** the 512 MB setting (the value is in KB) reaches the workstation through Group Policy. `Get-WinEvent -ListLog` still shows the size the log was created with; the policy value is the one the Event Log service enforces. In Event Viewer (Security → Properties) the size should appear greyed out, which means policy controls it.

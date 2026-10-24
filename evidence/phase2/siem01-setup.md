@@ -48,3 +48,15 @@ amit@siem01:~$ sudo systemctl status wazuh-manager wazuh-indexer wazuh-dashboard
      Active: active (running) since Sat 2026-10-24 12:56:19 BST
 ```
 **Proves:** indexer, manager, dashboard and the Filebeat shipper are all running. Timestamps are in BST, so the time zone is set correctly.
+
+## 4. Disk and package pinning
+
+```text
+amit@siem01:~$ df -h /
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/mapper/ubuntu--vg-ubuntu--lv   57G   22G   33G  41% /
+
+amit@siem01:~$ grep deb /etc/apt/sources.list.d/wazuh.list
+#deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main
+```
+**Proves:** the root volume uses the full disk, and the Wazuh repo is disabled, so a routine `apt upgrade` can't upgrade Wazuh by accident.

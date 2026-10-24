@@ -1,6 +1,6 @@
 # SecOps AD Lab: detecting identity attacks across a corporate domain
 
-> **Status: Phase 1 complete (domain, tiering, GPOs, audit logging).** Phase 2 (Sysmon + Wazuh) next. See [Roadmap](#roadmap).
+> **Status: Phase 2 complete (Sysmon + Wazuh SIEM, 11/11 telemetry tests).** Phase 3 (hardening) next. See [Roadmap](#roadmap).
 
 ## The business problem
 
@@ -51,6 +51,12 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 - Audit baseline live on DC and workstation; failed Kerberos logons (Event 4771, code `0x18`) captured with user and source IP.
 - Evidence: [validation](evidence/phase1/validation.md) · [GPO settings](config/gpo/README.md) · [write-up](docs/01-domain.md#8-phase-1-write-up) · [lab notes](lab-notes.md)
 
+### Phase 2: visibility (complete)
+- Wazuh 4.14 SIEM collecting Security, Sysmon and PowerShell logs from DC01 and WS01 through one central agent config.
+- Telemetry coverage tested with 11 harmless actions: all 11 arrived in the SIEM.
+- The logs surfaced a real control gap: the Tier 0 admin account had logged on to a workstation.
+- Evidence: [coverage](evidence/phase2/telemetry-coverage.md) · [write-up](docs/02-telemetry.md#10-phase-2-write-up) · [agent config](config/wazuh/agent.conf) · [Sysmon config](config/sysmon/README.md)
+
 ### Detection results (Phase 4)
 
 | ATT&CK technique | Simulated with | Result | Detection |
@@ -64,7 +70,7 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 ## Roadmap
 
 - [x] **Phase 1: Domain.** DC, OUs, tiered users and groups, workstation joined, baseline GPOs. → [docs/01-domain.md](docs/01-domain.md)
-- [ ] **Phase 2: Visibility.** Sysmon, advanced audit policy, Wazuh agents, telemetry coverage table. → [docs/02-telemetry.md](docs/02-telemetry.md)
+- [x] **Phase 2: Visibility.** Sysmon, advanced audit policy, Wazuh agents, telemetry coverage table. → [docs/02-telemetry.md](docs/02-telemetry.md)
 - [ ] **Phase 3: Hardening.** CIS baseline scan, remediation, before/after score. → [docs/03-hardening.md](docs/03-hardening.md)
 - [ ] **Phase 4: Simulate and detect.** Five ATT&CK techniques, Wazuh and Sigma rules, coverage matrix. → [docs/04-detections.md](docs/04-detections.md)
 - [ ] **Phase 5: Report.** Incident report and business companion. → [report/](report/)

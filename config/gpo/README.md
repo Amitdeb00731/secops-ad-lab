@@ -41,6 +41,13 @@ Linked to `OU=CORP` and `OU=Domain Controllers`.
 | `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit` | `ProcessCreationIncludeCmdLine_Enabled = 1` | Event 4688 includes the full command line |
 | `HKLM\System\CurrentControlSet\Control\Lsa` | `SCENoApplyLegacyAuditPolicy = 1` | Advanced audit settings override legacy category settings |
 
+**Added in Phase 2** (also via `Set-GPRegistryValue`):
+
+| Key | Value | Effect |
+| --- | --- | --- |
+| `HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging` | `EnableScriptBlockLogging = 1` | Event 4104 records the PowerShell code that actually runs, after de-obfuscation |
+| `HKLM\Software\Policies\Microsoft\Windows\EventLog\Security` | `MaxSize = 524288` (KB) | Security log 512 MB, so events survive between checks instead of rolling over at 20 MB |
+
 **Why:** these are the events the Phase 4 detections depend on: failed and successful logons (4624/4625), Kerberos ticket requests (4768/4769/4771), account and group changes (4720/4728), and process creation with command line (4688).
 
 ## GPO-Workstation-LocalAdmins
