@@ -400,11 +400,11 @@ Banks run control frameworks (often mapped to NIST CSF or CIS Controls) and are 
 - [x] `GPO-Hardening-Workstations` created, linked and verified (C1–C6, C8, C10)
 - [x] `GPO-Hardening-DC` created, linked and verified (C11, C12)
 - [x] NTLMv2-only (C7) and Protected Users (C9) applied
-- [ ] Tier 0 sign-in on WS01 refused, and the 4625 seen in Wazuh
+- [x] Tier 0 sign-in on WS01 refused, and the 4625 seen in Wazuh
 - [x] LAPS password set for WS01 (metadata only in evidence)
 - [x] Tier 2 group can join computers to the Workstations OU
 - [x] After SCA score recorded and exported
 - [x] Hardening register complete, accepted risks listed
-- [ ] GPO reports exported, `p3-hardened` snapshot, committed and pushed
+- [x] GPO reports exported, `p3-hardened` snapshot, committed and pushed
 
 **Next, Phase 4:** simulate five ATT&CK techniques and build detections.

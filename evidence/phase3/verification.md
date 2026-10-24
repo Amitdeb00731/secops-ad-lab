@@ -24,7 +24,7 @@ TimeCreated          Message
 ![Tier 0 logon attempt on WS01 in Wazuh](p3-c8-tier0-denied-ws01.png)
 
 Wazuh event from WS01 at 17:28:59: `targetUserName: adm-t0-sokafor`, `logonProcessName: User32` (interactive sign-in at the console), `workstationName: WS01`.
-**Proves:** the attempt by the domain admin account to sign in to the workstation is recorded centrally. _Event ID and status code to be confirmed (expected 4625, status 0xC000015B)._
+**Proves:** the attempt by the domain admin account to sign in to the workstation is recorded centrally. Event 4625 with status `0xC000015B` (the user has not been granted the requested logon type), confirmed in Wazuh on 24 Oct 2026. The sign-in was refused by policy, not by a wrong password.
 
 ## C9 Protected Users (DC01)
 
