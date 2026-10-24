@@ -13,3 +13,4 @@ What broke and how I fixed it. One line per issue.
 | 2026-10-24 | 6.4 | `New-NetIPAddress` on WS01: "Element not found" | Reused DC01's adapter index (6); each machine numbers adapters differently | Looked up index with `(Get-NetAdapter | ? Status -eq 'Up').ifIndex` |
 | 2026-10-24 | 7 | `dcdiag /q` failed SystemLog test: Netlogon 5723/5805 from `DESKTOP-RP3SPAR` | WS01's random hostname before the rename-and-join completed | Transient, from the join window. Verified: `Test-ComputerSecureChannel` returned True |
 | 2026-10-24 | 6 | WS01 profile folders timestamped later than real time | WS01 clock wrong before joining the domain | After joining, the domain hierarchy provides time; check `Get-Date` |
+| 2026-10-24 | P2 1.3 | Forgot the SIEM01 user password straight after install | Not saved during setup | Reset from GRUB recovery mode (root shell, `passwd`). Lesson: save credentials in the password manager at creation time |
