@@ -1,4 +1,4 @@
-# Group Policy configuration (Phase 1)
+# Group Policy configuration
 
 Three policies apply to the lab. This file records what each one sets and why, so the build can be reproduced and reviewed.
 
@@ -57,10 +57,26 @@ Group Policy Preference → Local Users and Groups → **Administrators (built-i
 
 **Why:** local admin rights are granted through one AD group, in one reviewable place, and apply automatically to every new workstation. No one is added by hand on individual machines.
 
+## Phase 3 hardening policies
+Each setting, the attack it stops and how it was verified are in the [hardening register](../../evidence/phase3/hardening-register.md).
+
+| Policy | Linked to | What it sets |
+| --- | --- | --- |
+| GPO-Hardening-Workstations | `OU=Workstations` | LLMNR and NBT-NS off, WDigest off, LSA protection, ASR rule for LSASS, SMB signing, Tier 0 logon denied, Windows LAPS, firewall policy and logging |
+| GPO-Hardening-DC | `OU=Domain Controllers` (link order 1) | Print Spooler disabled, LDAP signing required, SMB signing, SMBv1 off, firewall policy and logging |
+| Default Domain Policy | Domain | Added in Phase 3: LAN Manager authentication level 5 (NTLMv2 only) |
+| GPO-Audit-Baseline | `OU=CORP`, `OU=Domain Controllers` | Added in Phase 3: Account Lockout auditing (Failure) |
+
+`GPO-Hardening-DC` sits at link order 1 because the Default Domain Controllers Policy sets LDAP signing to *None* and otherwise wins.
+
 ## Full reports
 Full settings exported with `Get-GPOReport -ReportType Html` on DC01 (open in a browser):
 - [Default-Domain-Policy.html](Default-Domain-Policy.html)
 - [GPO-Audit-Baseline.html](GPO-Audit-Baseline.html)
 - [GPO-Workstation-LocalAdmins.html](GPO-Workstation-LocalAdmins.html)
+- [GPO-Hardening-Workstations.html](GPO-Hardening-Workstations.html) (Phase 3)
+- [GPO-Hardening-DC.html](GPO-Hardening-DC.html) (Phase 3)
+
+`Default-Domain-Policy.html` was re-exported after Phase 3 and includes the NTLMv2 setting.
 
 Resultant set of policy on WS01 (`gpresult /h`, run as `adm-t2-sokafor`): [gpresult-ws01.html](gpresult-ws01.html). It confirms all three GPOs apply to the computer.

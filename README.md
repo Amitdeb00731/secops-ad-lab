@@ -1,6 +1,6 @@
 # SecOps AD Lab: detecting identity attacks across a corporate domain
 
-> **Status: Phase 2 complete (Sysmon + Wazuh SIEM, 11/11 telemetry tests).** Phase 3 (hardening) next. See [Roadmap](#roadmap).
+> **Status: Phase 3 complete (CIS hardening: DC01 29% → 38%, WS01 27% → 33%).** Phase 4 (simulate and detect) next. See [Roadmap](#roadmap).
 
 ## The business problem
 
@@ -57,6 +57,13 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 - The logs surfaced a real control gap: the Tier 0 admin account had logged on to a workstation.
 - Evidence: [coverage](evidence/phase2/telemetry-coverage.md) · [write-up](docs/02-telemetry.md#10-phase-2-write-up) · [agent config](config/wazuh/agent.conf) · [Sysmon config](config/sysmon/README.md)
 
+### Phase 3: hardening (complete)
+- 16 controls applied by Group Policy, each tied to the attack it stops and checked on the host.
+- CIS score measured with Wazuh SCA: DC01 29% → 38% (34 checks fixed), WS01 27% → 33% (30 fixed), no regressions.
+- Closes the Phase 2 finding: Tier 0 admins can no longer sign in to workstations; local admin passwords are now unique and rotated by Windows LAPS.
+- Accepted risks kept on record (weak service account and RC4 left for Phase 4).
+- Evidence: [hardening register](evidence/phase3/hardening-register.md) · [SCA comparison](evidence/phase3/sca-comparison.md) · [verification](evidence/phase3/verification.md) · [write-up](docs/03-hardening.md#8-phase-3-write-up)
+
 ### Detection results (Phase 4)
 
 | ATT&CK technique | Simulated with | Result | Detection |
@@ -71,7 +78,7 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 
 - [x] **Phase 1: Domain.** DC, OUs, tiered users and groups, workstation joined, baseline GPOs. → [docs/01-domain.md](docs/01-domain.md)
 - [x] **Phase 2: Visibility.** Sysmon, advanced audit policy, Wazuh agents, telemetry coverage table. → [docs/02-telemetry.md](docs/02-telemetry.md)
-- [ ] **Phase 3: Hardening.** CIS baseline scan, remediation, before/after score. → [docs/03-hardening.md](docs/03-hardening.md)
+- [x] **Phase 3: Hardening.** CIS baseline scan, remediation, before/after score. → [docs/03-hardening.md](docs/03-hardening.md)
 - [ ] **Phase 4: Simulate and detect.** Five ATT&CK techniques, Wazuh and Sigma rules, coverage matrix. → [docs/04-detections.md](docs/04-detections.md)
 - [ ] **Phase 5: Report.** Incident report and business companion. → [report/](report/)
 
