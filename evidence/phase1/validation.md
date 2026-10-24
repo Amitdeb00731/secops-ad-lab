@@ -47,7 +47,7 @@ adm-t0-sokafor
 **Proves:** only the built-in account and the dedicated Tier 0 admin hold domain admin. Daily accounts (`sokafor`) and the Tier 2 admin do not.
 
 ## 5. Group Policy applied to the workstation (WS01)
-See [gpresult-ws01.txt](gpresult-ws01.txt). Applied: `GPO-Workstation-LocalAdmins`, `GPO-Audit-Baseline`, `Default Domain Policy`.
+See [gpresult-ws01.txt](gpresult-ws01.txt) and the full HTML report [gpresult-ws01.html](../../config/gpo/gpresult-ws01.html). Applied: `GPO-Workstation-LocalAdmins`, `GPO-Audit-Baseline`, `Default Domain Policy`.
 
 ## 6. Local admin rights granted by group, not by hand (WS01)
 
@@ -93,4 +93,13 @@ See [4771-failed-preauth.txt](4771-failed-preauth.txt): five Kerberos pre-authen
 
 ## 10. Domain controller health (DC01)
 
-`dcdiag /q` reported one failure, in the **SystemLog** test: Netlogon errors 5723 and 5805 from `DESKTOP-RP3SPAR` at 10:40 and 10:46. That was WS01's random pre-rename hostname while the join and rename were in progress. These are transient; the test only looks at recent errors. Secure channel check: `Test-ComputerSecureChannel` on WS01.
+`dcdiag /q` reported one failure, in the **SystemLog** test: Netlogon errors 5723 and 5805 from `DESKTOP-RP3SPAR` at 10:40 and 10:46. That was WS01's random pre-rename hostname while the join and rename were in progress. These are transient; the test only looks at recent errors.
+
+Secure channel check on WS01:
+```text
+PS> Test-ComputerSecureChannel -Verbose
+VERBOSE: Performing the operation "Test-ComputerSecureChannel" on target "WS01".
+True
+VERBOSE: The secure channel between the local computer and the domain corp.lab is in good condition.
+```
+**Proves:** WS01's machine account trust with the domain is healthy, so the earlier Netlogon errors were from the join window only.

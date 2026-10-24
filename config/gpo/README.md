@@ -3,7 +3,7 @@
 Three policies apply to the lab. This file records what each one sets and why, so the build can be reproduced and reviewed.
 
 ## Default Domain Policy: password and lockout
-Set with `Set-ADDefaultDomainPasswordPolicy` (output: [password-policy.txt](password-policy.txt)).
+Set with `Set-ADDefaultDomainPasswordPolicy` (output: [password-policy.txt](password-policy.txt)). The report also shows *Do not store LAN Manager hash* enabled and *reversible encryption* disabled, both Windows defaults.
 
 | Setting | Value | Why |
 | --- | --- | --- |
@@ -50,5 +50,10 @@ Group Policy Preference → Local Users and Groups → **Administrators (built-i
 
 **Why:** local admin rights are granted through one AD group, in one reviewable place, and apply automatically to every new workstation. No one is added by hand on individual machines.
 
-## To add later
-HTML exports of each GPO (`Get-GPOReport -Name <name> -ReportType Html`) for a full settings record.
+## Full reports
+Full settings exported with `Get-GPOReport -ReportType Html` on DC01 (open in a browser):
+- [Default-Domain-Policy.html](Default-Domain-Policy.html)
+- [GPO-Audit-Baseline.html](GPO-Audit-Baseline.html)
+- [GPO-Workstation-LocalAdmins.html](GPO-Workstation-LocalAdmins.html)
+
+Resultant set of policy on WS01 (`gpresult /h`, run as `adm-t2-sokafor`): [gpresult-ws01.html](gpresult-ws01.html). It confirms all three GPOs apply to the computer.
