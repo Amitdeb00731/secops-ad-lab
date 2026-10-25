@@ -1,6 +1,6 @@
 # SecOps AD Lab: detecting identity attacks across a corporate domain
 
-> **Status: Phase 4 complete (5/5 ATT&CK techniques simulated and detected, one blocked by a Phase 3 control).** Phase 5 (report) next. See [Roadmap](#roadmap).
+> **Status: Phase 4 complete (5/5 ATT&CK techniques simulated and detected, one blocked by a Phase 3 control); Phase 5 report drafted.** See [Roadmap](#roadmap).
 
 ## The business problem
 
@@ -64,23 +64,26 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 - Accepted risks kept on record (weak service account and RC4 left for Phase 4).
 - Evidence: [hardening register](evidence/phase3/hardening-register.md) · [SCA comparison](evidence/phase3/sca-comparison.md) · [verification](evidence/phase3/verification.md) · [write-up](docs/03-hardening.md#8-phase-3-write-up)
 
-### Detection results (Phase 4)
+### Phase 4: detection engineering (complete)
+- Five ATT&CK techniques simulated with Atomic Red Team in the isolated lab, one at a time, each detection rule tuned against a real captured event and paired with a portable Sigma rule.
+- Every technique detected at the intended severity; the LSASS dump was **blocked outright by the Phase 3 controls**, and the block was turned into its own alert after onboarding the Defender channel — the control/detection trade-off made explicit.
+- Evidence: [coverage matrix](evidence/phase4/coverage-matrix.md) · [write-up](docs/04-detections.md#9-phase-4-write-up) · [rules](detections/wazuh/local_rules.xml) · [Sigma](detections/sigma/)
 
 | ATT&CK technique | Simulated with | Result | Detection |
 | --- | --- | --- | --- |
-| T1087 Account Discovery | Atomic Red Team | pending | |
-| T1003 OS Credential Dumping | Atomic Red Team | pending | |
-| T1558.003 Kerberoasting | Atomic Red Team | pending | |
-| T1021.002 SMB / Admin Shares | Atomic Red Team | pending | |
-| T1053.005 Scheduled Task | Atomic Red Team | pending | |
+| T1087.002 / T1069.002 Account & Group Discovery | Atomic Red Team | Detected | Wazuh 100211 (level 10) + Sigma |
+| T1558.003 Kerberoasting | Atomic Red Team | Detected | Wazuh 100220 (level 12) + Sigma |
+| T1003.001 LSASS Credential Dumping | Atomic Red Team | Blocked + detected | Wazuh 100231 (level 12) + Sigma |
+| T1021.002 SMB / Admin Shares | Atomic Red Team | Detected | Wazuh 100240 (level 12) + Sigma |
+| T1053.005 Scheduled Task | Atomic Red Team | Detected | Wazuh 100250/100251 (level 12) + Sigma |
 
 ## Roadmap
 
 - [x] **Phase 1: Domain.** DC, OUs, tiered users and groups, workstation joined, baseline GPOs. → [docs/01-domain.md](docs/01-domain.md)
 - [x] **Phase 2: Visibility.** Sysmon, advanced audit policy, Wazuh agents, telemetry coverage table. → [docs/02-telemetry.md](docs/02-telemetry.md)
 - [x] **Phase 3: Hardening.** CIS baseline scan, remediation, before/after score. → [docs/03-hardening.md](docs/03-hardening.md)
-- [ ] **Phase 4: Simulate and detect.** Five ATT&CK techniques, Wazuh and Sigma rules, coverage matrix. → [docs/04-detections.md](docs/04-detections.md)
-- [ ] **Phase 5: Report.** Incident report and business companion. → [report/](report/)
+- [x] **Phase 4: Simulate and detect.** Five ATT&CK techniques, Wazuh and Sigma rules, coverage matrix. → [docs/04-detections.md](docs/04-detections.md)
+- [x] **Phase 5: Report.** Incident report and business companion. → [report/](report/) ([incident report](report/incident-report.md) · [business companion](report/business-companion.md))
 
 Planned extensions: a second workstation, CI linting of Sigma rules, and an isolated OT/building-systems subnet for an IT-to-OT segmentation study.
 
