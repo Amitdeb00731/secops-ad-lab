@@ -1,0 +1,23 @@
+title: LSASS Memory Dump via comsvcs.dll MiniDump
+id: 4e1b7c92-8a3d-4f10-bc55-lsasscomsvcs01
+status: experimental
+description: Detects the comsvcs.dll MiniDump LOLBIN technique used to dump LSASS memory, matched on the process command line. Catches the attempt even when LSA protection / ASR blocks the actual memory read.
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+author: Amit (SecOps AD lab)
+date: 2026-10-25
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains|all:
+      - 'comsvcs'
+      - 'MiniDump'
+  condition: selection
+falsepositives:
+  - Very rare; comsvcs MiniDump has essentially no legitimate interactive use
+level: critical
+tags:
+  - attack.credential_access
+  - attack.t1003.001

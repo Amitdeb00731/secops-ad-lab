@@ -1,0 +1,35 @@
+title: Privileged Domain Group Discovery via net group
+id: 7a1c2e40-4d3b-4e2a-9c1f-net0groupdisc01
+status: experimental
+description: Detects enumeration of privileged domain groups (Domain Admins, Enterprise Admins, etc.) using net.exe / net1.exe, a common early reconnaissance step.
+references:
+  - https://attack.mitre.org/techniques/T1069/002/
+  - https://attack.mitre.org/techniques/T1087/002/
+author: Amit (SecOps AD lab)
+date: 2026-10-25
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    OriginalFileName: net1.exe
+  selection_cmd:
+    CommandLine|contains|all:
+      - 'group'
+      - '/domain'
+  selection_priv:
+    CommandLine|contains:
+      - 'Domain Admins'
+      - 'Enterprise Admins'
+      - 'Schema Admins'
+      - 'Account Operators'
+      - 'Group Policy Creator'
+      - 'Protected Users'
+  condition: selection_img and selection_cmd and selection_priv
+falsepositives:
+  - Legitimate administrators auditing group membership from a management host
+level: high
+tags:
+  - attack.discovery
+  - attack.t1069.002
+  - attack.t1087.002

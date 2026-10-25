@@ -1,6 +1,6 @@
 # SecOps AD Lab: detecting identity attacks across a corporate domain
 
-> **Status: Phase 3 complete (CIS hardening: DC01 29% → 38%, WS01 27% → 33%).** Phase 4 (simulate and detect) next. See [Roadmap](#roadmap).
+> **Status: Phase 4 complete (5/5 ATT&CK techniques simulated and detected, one blocked by a Phase 3 control).** Phase 5 (report) next. See [Roadmap](#roadmap).
 
 ## The business problem
 

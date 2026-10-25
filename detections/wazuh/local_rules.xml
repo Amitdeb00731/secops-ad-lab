@@ -1,0 +1,148 @@
+<!--
+  Custom detection rules for the SecOps AD lab (Phase 4).
+  Rule IDs 100200-100299 are reserved for this project.
+  Deploy on SIEM01:
+    sudo cp this file to /var/ossec/etc/rules/local_rules.xml
+    sudo systemctl restart wazuh-manager
+  Each rule is written against a real event captured from the lab.
+-->
+<group name="local,sysmon,windows,">
+
+  <!--
+    T1087.002 / T1069.002  Domain account and group discovery via net.exe
+    Wazuh ships 92031/92033 for this at level 3 (informational). These two
+    rules escalate the privileged-group case, which is the real signal:
+    a host enumerating Domain Admins / Enterprise Admins is reconnaissance,
+    not routine admin. Keyed on originalFileName so a renamed net1.exe still
+    matches, and on net1.exe only so each `net group` fires once (net.exe
+    spawns net1.exe; both are logged).
+  -->
+  <rule id="100210" level="5">
+    <if_group>sysmon_eid1_detections</if_group>
+    <field name="win.eventdata.originalFileName" type="pcre2">(?i)^net1\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\bgroup\b.{0,100}/domain</field>
+    <description>Domain group enumeration via net group /domain by $(win.eventdata.user) on $(win.system.computer) (T1069.002)</description>
+    <mitre>
+      <id>T1069.002</id>
+      <id>T1087.002</id>
+    </mitre>
+  </rule>
+
+  <rule id="100211" level="10">
+    <if_sid>100210</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(domain admins|enterprise admins|schema admins|account operators|group policy creator|protected users)</field>
+    <description>Privileged domain group enumeration ($(win.eventdata.user) on $(win.system.computer)) - possible recon (T1069.002/T1087.002)</description>
+    <mitre>
+      <id>T1069.002</id>
+      <id>T1087.002</id>
+    </mitre>
+  </rule>
+
+  <!--
+    T1558.003  Kerberoasting - RC4 service ticket requested for a user-context
+    service account. 4769 is high-volume, so this keys tightly: RC4 encryption
+    (0x17) + a serviceName that is NOT a machine account (does not end in $)
+    + success. A domain that has disabled RC4, or a service account pinned to
+    AES, will not produce 0x17 - that is the mitigation, and worth noting.
+  -->
+  <rule id="100220" level="12">
+    <if_group>windows_security</if_group>
+    <field name="win.system.eventID">^4769$</field>
+    <field name="win.eventdata.ticketEncryptionType">^0x17$</field>
+    <field name="win.eventdata.status">^0x0$</field>
+    <field name="win.eventdata.serviceName" negate="yes" type="pcre2">\$$|^krbtgt$</field>
+    <description>Possible Kerberoasting: RC4 service ticket for account $(win.eventdata.serviceName) requested by $(win.eventdata.targetUserName) (T1558.003)</description>
+    <mitre>
+      <id>T1558.003</id>
+    </mitre>
+  </rule>
+
+  <!--
+    T1003.001  LSASS memory dump via the comsvcs.dll MiniDump LOLBIN.
+    On WS01 the attempt was blocked (RunAsPPL + ASR), so there was no Sysmon
+    Event 10 handle and the Defender block did not reach the SIEM - but the
+    command line is still captured in process creation (Security 4688 here,
+    Sysmon Event 1 on an unhardened host). We detect the intent from that.
+    Matches either event type on the comsvcs+MiniDump signature.
+  -->
+  <rule id="100230" level="12">
+    <decoded_as>windows_eventchannel</decoded_as>
+    <field name="win.system.eventID" type="pcre2">^(1|4688)$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)comsvcs.{0,40}minidump</field>
+    <description>LSASS memory dump attempt via comsvcs.dll MiniDump (LOLBIN) on $(win.system.computer) (T1003.001)</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+  </rule>
+
+  <!--
+    T1003.001 companion: when Defender/ASR blocks the comsvcs MiniDump
+    pre-execution, no 4688/Sysmon 1 is generated, so 100230 has nothing to
+    match. The attempt is still visible in the Defender detection (1116/1117),
+    whose "path" field carries the command line. This rule turns that generic
+    AV alert into a precise "LSASS dump blocked" detection mapped to T1003.001.
+  -->
+  <rule id="100231" level="12">
+    <if_group>windows_defender</if_group>
+    <field name="win.eventdata.path" type="pcre2">(?i)comsvcs.{0,40}minidump|minidump.{0,40}lsass</field>
+    <description>LSASS credential dump blocked by Defender (comsvcs MiniDump) on $(win.system.computer) - T1003.001 attempt stopped</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+  </rule>
+
+  <!--
+    T1021.002  Lateral movement over SMB using the default admin shares.
+    Requires "Audit File Share" (Object Access) enabled on the target - added
+    to GPO-Audit-Baseline in Phase 4 so DC01 emits 5140. Wazuh ships 67017 for
+    5140 at level 3, but it fires for every SYSVOL/NETLOGON access on a DC, so
+    it is noise on its own. This child rule escalates only the admin-share case:
+    ADMIN$ or a drive-letter share (C$, D$...) being opened. IPC$ is excluded
+    (every SMB session touches it) and named shares do not match. Accessing a
+    DC's ADMIN$/C$ is rarely legitimate and almost never from a workstation -
+    here the source is WS01 (10.10.10.101), the same Tier 0 credential on a
+    workstation we flagged in Phase 2. \\+ tolerates Wazuh's backslash encoding.
+  -->
+  <rule id="100240" level="12">
+    <if_sid>67017</if_sid>
+    <field name="win.eventdata.shareName" type="pcre2">(?i)\\+(ADMIN|[A-Z])\$</field>
+    <description>Admin share $(win.eventdata.shareName) opened on $(win.system.computer) by $(win.eventdata.subjectUserName) from $(win.eventdata.ipAddress) - possible SMB lateral movement (T1021.002)</description>
+    <mitre>
+      <id>T1021.002</id>
+    </mitre>
+    <group>lateral_movement,smb_admin_shares,</group>
+  </rule>
+
+  <!--
+    T1053.005  Persistence via a scheduled task. Wazuh ships 60228 for 4698
+    (task created) at level 4 - too quiet, and 4698 fires for plenty of benign
+    software installs. The signal is in the task's embedded XML (taskContent):
+    what it runs and as whom. Two tiers:
+      100250 - the task action is a command shell or scripting LOLBIN.
+      100251 - that task also runs as SYSTEM (S-1-5-18) or re-runs on every
+               boot/logon - persistence with privilege, the loud case.
+    taskContent carries the XML HTML-entity-encoded, so we match the plain
+    tokens that survive encoding (cmd.exe, S-1-5-18, BootTrigger) rather than
+    the <tags>.
+  -->
+  <rule id="100250" level="8">
+    <if_sid>60228</if_sid>
+    <field name="win.eventdata.taskContent" type="pcre2">(?i)(cmd\.exe|powershell|pwsh\.exe|wscript|cscript|mshta|rundll32|regsvr32|bitsadmin|certutil|curl\.exe)</field>
+    <description>Scheduled task $(win.eventdata.taskName) created to run a shell/LOLBIN by $(win.eventdata.subjectUserName) on $(win.system.computer) (T1053.005)</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+    <group>persistence,scheduled_task,</group>
+  </rule>
+
+  <rule id="100251" level="12">
+    <if_sid>100250</if_sid>
+    <field name="win.eventdata.taskContent" type="pcre2">(?i)S-1-5-18|BootTrigger|LogonTrigger|HighestAvailable</field>
+    <description>Scheduled task $(win.eventdata.taskName) persists as SYSTEM or on boot/logon and runs a shell on $(win.system.computer) - likely persistence (T1053.005)</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+    <group>persistence,scheduled_task,</group>
+  </rule>
+
+</group>

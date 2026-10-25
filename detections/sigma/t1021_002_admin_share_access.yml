@@ -1,0 +1,32 @@
+title: Admin Share Access on Domain Controller (SMB Lateral Movement)
+id: 7c2f0a1e-9d44-4b6e-9b2a-3e6b0c1d5a40
+status: experimental
+description: >
+  Detects access to the default administrative shares (ADMIN$ or a drive-letter
+  share such as C$) over SMB on a domain controller. Maps Windows Security event
+  5140 (a network share object was accessed) with the File Share audit subcategory
+  enabled. Administrative-share access to a DC is rarely legitimate and almost never
+  originates from a workstation; it is a common lateral-movement and remote-execution
+  primitive (PsExec, remote service install, remote scheduled task).
+references:
+  - https://attack.mitre.org/techniques/T1021/002/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1021.002/T1021.002.md
+author: secops-ad-lab (Phase 4)
+date: 2026/10/25
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 5140
+    ShareName|re: '(?i)\\+(ADMIN|[A-Z])\$'
+  filter_ipc:
+    ShareName|endswith: 'IPC$'
+  condition: selection and not filter_ipc
+falsepositives:
+  - Legitimate administration from an approved admin jump host (allowlist by source IP)
+  - Backup, inventory or management agents that mount admin shares
+level: high
+tags:
+  - attack.lateral_movement
+  - attack.t1021.002
