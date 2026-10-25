@@ -1,6 +1,6 @@
 # SecOps AD Lab: detecting identity attacks across a corporate domain
 
-> **Status: Phase 4 complete (5/5 ATT&CK techniques simulated and detected, one blocked by a Phase 3 control); Phase 5 report drafted.** See [Roadmap](#roadmap).
+> **Status: complete. All five phases delivered (domain, visibility, hardening, detection engineering, reporting); 5/5 ATT&CK techniques detected, one blocked by a Phase 3 control.** See [Roadmap](#roadmap).
 
 ## The business problem
 
@@ -76,6 +76,11 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 | T1003.001 LSASS Credential Dumping | Atomic Red Team | Blocked + detected | Wazuh 100231 (level 12) + Sigma |
 | T1021.002 SMB / Admin Shares | Atomic Red Team | Detected | Wazuh 100240 (level 12) + Sigma |
 | T1053.005 Scheduled Task | Atomic Red Team | Detected | Wazuh 100250/100251 (level 12) + Sigma |
+
+### Phase 5: report (complete)
+- Incident report (IR-2026-001) covering the five techniques as a single intrusion: timeline, per-stage findings against the captured events, ATT&CK mapping, root cause, containment and recovery, and recommendations.
+- One-page business summary framed against UK operational resilience (PRA/FCA important business services and impact tolerances) for a non-technical risk audience.
+- Evidence: [incident report](report/incident-report.md) · [business companion](report/business-companion.md) · [index](report/README.md)
 
 ## Roadmap
 
