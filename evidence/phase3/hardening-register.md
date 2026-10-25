@@ -16,11 +16,11 @@ One line per control: what is set, where, why, and how it was verified. Status: 
 | C10 | Windows LAPS | `localadmin`, 15 chars, 30 days, backup to AD, encrypted, reset 8 h after use | GPO-Hardening-Workstations | Workstations | Shared local admin password | T1021.002, T1078.003 | `Get-LapsADPassword` metadata | Verified |
 | C11 | Print Spooler off on DC | Service disabled | GPO-Hardening-DC | DC | Coercion and spooler exploits | T1187, T1068 | `Get-Service Spooler` | Verified |
 | C12 | LDAP signing required | Require signing | GPO-Hardening-DC | DC | LDAP relay | T1557 | `LDAPServerIntegrity = 2` | Verified |
-| C13 | Defender on | Real-time protection on | Windows default | Both | General exposure | — | `Get-MpComputerStatus` | Planned |
+| C13 | Defender on | Real-time protection on | Windows default | Both | General exposure | n/a | `Get-MpComputerStatus` | Planned |
 | C14 | Firewall by policy | On, inbound block, logging dropped and allowed, 16 MB | GPO-Hardening-Workstations, GPO-Hardening-DC | Both | Unfiltered inbound; no firewall audit trail | T1021 | `Get-NetFirewallProfile -PolicyStore ActiveStore` | Verified (SCA) |
 | C15 | SMBv1 off by policy | `mrxsmb10 Start = 4`, `SMB1 = 0` | GPO-Hardening-DC | DC | Legacy SMB exploits | T1210 | Registry values | Verified (SCA) |
 | C16 | Audit account lockouts | Logon/Logoff → Account Lockout: Failure | GPO-Audit-Baseline | Both | No lockout records | T1110 | `auditpol` | Verified |
-| — | Least-privilege computer join | Tier 2 group delegated join rights on Workstations OU | AD delegation | Workstations OU | Need to use Tier 0 to join machines | T1078.002 | OU ACL | Verified |
+| n/a | Least-privilege computer join | Tier 2 group delegated join rights on Workstations OU | AD delegation | Workstations OU | Need to use Tier 0 to join machines | T1078.002 | OU ACL | Verified |
 
 ## Documented deviations from CIS
 
@@ -49,4 +49,4 @@ One line per control: what is set, where, why, and how it was verified. Status: 
 
 Failed checks exported: before [DC01](sca-before-dc01.csv) / [WS01](sca-before-ws01.csv), after [DC01](sca-after-dc01.csv) / [WS01](sca-after-ws01.csv). Check-by-check comparison: [sca-comparison.md](sca-comparison.md).
 
-Score = passed / (passed + failed), as calculated by Wazuh SCA. Baseline is a default Windows install plus the Phase 1–2 GPOs.
+Score = passed / (passed + failed), as calculated by Wazuh SCA. Baseline is a default Windows install plus the Phase 1-2 GPOs.

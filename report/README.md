@@ -1,4 +1,4 @@
-# Phase 5 — Report
+# Phase 5: Report
 
 Turns the Phase 4 detection exercise into the two artefacts a security function
 produces after an intrusion: a technical incident report and a business summary.
@@ -10,6 +10,6 @@ produces after an intrusion: a technical incident report and a business summary.
 
 Both describe the single simulated intrusion run on 2026-10-25 in the isolated
 `corp.lab` lab (see [docs/04-detections.md](../docs/04-detections.md) and
-[evidence/phase4/](../evidence/phase4/)). They are illustrative — written in
+[evidence/phase4/](../evidence/phase4/)). They are illustrative, written in
 incident-response format to demonstrate the detect-and-respond and
 risk-communication workflow, not a record of a real breach.

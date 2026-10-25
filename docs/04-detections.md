@@ -60,13 +60,13 @@ Always read `-ShowDetailsBrief` before you run, so you know exactly what each te
 
 ---
 
-## 2. Technique 1 — Account and group discovery (T1087, T1069)
+## 2. Technique 1: Account and group discovery (T1087, T1069)
 
 **Story:** an attacker with a normal user shell enumerates domain accounts and privileged groups to find targets.
 
 ### Simulate (WS01, as a standard user `pshah` is enough)
 
-**Atomic T1087.002, Test 1 — "Enumerate all accounts (Domain)".** It runs `net user /domain` and `net group /domain`, both built-in, no prereqs:
+**Atomic T1087.002, Test 1, "Enumerate all accounts (Domain)".** It runs `net user /domain` and `net group /domain`, both built-in, no prereqs:
 
 ```powershell
 Invoke-AtomicTest T1087.002 -TestNumbers 1 -ShowDetailsBrief
@@ -101,13 +101,13 @@ A single `net group` is not malicious on its own; the signal is **a standard use
 
 ---
 
-## 3. Technique 2 — Kerberoasting (T1558.003)
+## 3. Technique 2: Kerberoasting (T1558.003)
 
-**Story:** any domain user can request a service ticket for an account that has an SPN. The ticket is encrypted with the service account's password hash, so it can be cracked offline. This is why you deliberately left `svc-sql` with a weak password and an SPN in Phase 1 — it is the bait.
+**Story:** any domain user can request a service ticket for an account that has an SPN. The ticket is encrypted with the service account's password hash, so it can be cracked offline. This is why you deliberately left `svc-sql` with a weak password and an SPN in Phase 1: it is the bait.
 
 ### Simulate (WS01, as `pshah`)
 
-**Atomic T1558.003, Test 5 — "Request All Tickets via PowerShell".** It enumerates every SPN in the domain with `setspn` and requests a ticket for each, all built-in, no internet needed:
+**Atomic T1558.003, Test 5, "Request All Tickets via PowerShell".** It enumerates every SPN in the domain with `setspn` and requests a ticket for each, all built-in, no internet needed:
 
 ```powershell
 Invoke-AtomicTest T1558.003 -TestNumbers 5 -ShowDetailsBrief
@@ -120,7 +120,7 @@ New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentL
 ```
 Use the exact SPN you set on `svc-sql` in Phase 1. If it is registered against a different host or port, adjust the argument to match.
 
-> Tests 1, 2 and 7 fetch Invoke-Kerberoast or Rubeus from the internet. Skip those on the isolated lab — Test 5 plus the by-hand request give the same 4769 event without pulling anything in.
+> Tests 1, 2 and 7 fetch Invoke-Kerberoast or Rubeus from the internet. Skip those on the isolated lab. Test 5 plus the by-hand request give the same 4769 event without pulling anything in.
 
 ### What to look for
 
@@ -141,26 +141,26 @@ The honest version of this rule is noisy if you alert on every 4769, so it keys 
 </rule>
 ```
 
-This is the technique most likely to show a **real detection gap** worth writing up: if RC4 were disabled (an accepted risk you documented), the signal would be weaker and you would lean on volume-based detection instead. Say that in the write-up — it shows you understand the control/detection trade-off.
+This is the technique most likely to show a **real detection gap** worth writing up: if RC4 were disabled (an accepted risk you documented), the signal would be weaker and you would lean on volume-based detection instead. Record this in the write-up as an explicit control/detection trade-off.
 
 **Evidence:** paste the 4769 event with `ticketEncryptionType 0x17` and `serviceName svc-sql`.
 
 ---
 
-## 4. Technique 3 — Credential access from LSASS (T1003.001)
+## 4. Technique 3: Credential access from LSASS (T1003.001)
 
 **Story:** an attacker with admin on the box tries to read LSASS memory to pull credentials. Your Phase 3 controls (LSA protection / RunAsPPL on WS01, and the ASR rule that blocks LSASS access) are meant to stop or flag this. This test checks whether the **control fired** and whether you can **see it**.
 
 ### Simulate (WS01, elevated as `adm-t2-sokafor`)
 
-**Atomic T1003.001, Test 2 — "Dump LSASS.exe Memory using comsvcs.dll".** This is the cleanest one for a lab: it uses only a built-in Windows DLL, no external binary, no mimikatz:
+**Atomic T1003.001, Test 2, "Dump LSASS.exe Memory using comsvcs.dll".** This is the cleanest one for a lab: it uses only a built-in Windows DLL, no external binary, no mimikatz:
 
 ```powershell
 Invoke-AtomicTest T1003.001 -TestNumbers 2 -ShowDetailsBrief
 Invoke-AtomicTest T1003.001 -TestNumbers 2
 Invoke-AtomicTest T1003.001 -TestNumbers 2 -Cleanup
 ```
-The underlying command is `rundll32.exe comsvcs.dll, MiniDump <lsass pid> ...`. Expect it to be **blocked or flagged** on WS01 by your RunAsPPL and ASR controls — that is the intended outcome. The point is the evidence, not a successful dump. If you want to also see what it looks like on a box *without* those controls, run it on DC01 (which you left without RunAsPPL as a documented accepted risk) and compare.
+The underlying command is `rundll32.exe comsvcs.dll, MiniDump <lsass pid> ...`. Expect it to be **blocked or flagged** on WS01 by your RunAsPPL and ASR controls. That is the intended outcome. The point is the evidence, not a successful dump. If you want to also see what it looks like on a box *without* those controls, run it on DC01 (which you left without RunAsPPL as a documented accepted risk) and compare.
 
 ### What to look for (two signals)
 
@@ -178,17 +178,17 @@ The underlying command is `rundll32.exe comsvcs.dll, MiniDump <lsass pid> ...`. 
   <mitre><id>T1003.001</id></mitre>
 </rule>
 ```
-Add a second rule on the ASR block event (Defender 1121) at the same level — a block that you can see is a win, and worth its own alert.
+Add a second rule on the ASR block event (Defender 1121) at the same level. A block you can see is itself a useful signal and warrants its own alert.
 
 **Evidence:** paste the Sysmon Event 10 against `lsass.exe`, and the Defender ASR block event if one appears. Note in the box whether the dump was **blocked** (expected on WS01).
 
 ---
 
-## 5. Technique 4 — Lateral movement over SMB admin shares (T1021.002)
+## 5. Technique 4: Lateral movement over SMB admin shares (T1021.002)
 
 **Story:** with admin credentials, an attacker reaches another host's hidden `C$`/`ADMIN$` share and runs code there.
 
-### Prerequisite — enable file-share auditing on DC01
+### Prerequisite: enable file-share auditing on DC01
 
 Admin-share access logs **Security 5140** only when the *Audit File Share*
 subcategory is on, which it was not. Add it to **GPO-Audit-Baseline**:
@@ -203,7 +203,7 @@ auditpol /get /subcategory:"File Share"   # expect: Success and Failure
 
 ### Simulate (from WS01 toward DC01, elevated)
 
-**Atomic T1021.002, Test 1 — "Map admin share"** runs `net use` (built-in). Two
+**Atomic T1021.002, Test 1, "Map admin share"** runs `net use` (built-in). Two
 runs tell the whole story:
 
 ```powershell
@@ -215,8 +215,8 @@ net use \\dc01.corp.lab\ADMIN$ /user:corp\adm-t0-sokafor *
 dir  \\dc01.corp.lab\C$
 net use \\dc01.corp.lab\ADMIN$ /delete
 ```
-Run (a) first: a Tier 2 admin has no rights on the DC, so the map fails — the
-tiering model working. Run (b) is a Domain Admin credential used *from a
+Run (a) first: a Tier 2 admin has no rights on the DC, so the map fails, which is
+the tiering model working. Run (b) is a Domain Admin credential used *from a
 workstation*, the exact tiering breach flagged in Phase 2, and it opens the DC.
 Type the password at the prompt; never paste it into the repo or the chat.
 
@@ -225,7 +225,7 @@ Type the password at the prompt; never paste it into the repo or the chat.
 The successful map produces **Security 5140** on DC01 for `\\*\ADMIN$` and
 `\\*\C$` (plus a benign `\\*\IPC$`), with `subjectUserName` = the admin account
 and `ipAddress` = 10.10.10.101 (WS01). Filter `data.win.system.eventID: 5140`.
-Wazuh's built-in **67017** matches these at level 3 — correctly tagged but too
+Wazuh's built-in **67017** matches these at level 3, correctly tagged but too
 low, and it also fires on every SYSVOL/NETLOGON access, so it is noise alone.
 
 ### Detect
@@ -242,8 +242,8 @@ Escalate only the admin-share case, chaining off 67017:
 </rule>
 ```
 `\\+(ADMIN|[A-Z])\$` matches `ADMIN$` and any drive-letter share (`C$`, `D$`…);
-`\\+` tolerates Wazuh's backslash encoding. **IPC$ is excluded** — its component
-before `$` is `IPC`, not a single letter — and named shares (SYSVOL, NETLOGON)
+`\\+` tolerates Wazuh's backslash encoding. **IPC$ is excluded**, its component
+before `$` is `IPC`, not a single letter, and named shares (SYSVOL, NETLOGON)
 never match. **Tuning:** in production, allowlist the approved admin jump host on
 `win.eventdata.ipAddress`; the lab has none, so every admin-share hit alerts.
 
@@ -252,13 +252,13 @@ stayed silent on IPC$ and SYSVOL. Evidence: `evidence/phase4/t4-lateral-movement
 
 ---
 
-## 6. Technique 5 — Persistence via scheduled task (T1053.005)
+## 6. Technique 5: Persistence via scheduled task (T1053.005)
 
 **Story:** the attacker creates a scheduled task so their code runs again after a reboot or on a timer. You already proved in Phase 2 that task creation reaches Wazuh (Event 4698), so here you turn that into a tuned detection.
 
 ### Simulate (WS01, elevated)
 
-**Atomic T1053.005, Test 1 — "Scheduled Task Startup Script".** Built-in `schtasks`, creates an onlogon and an onstart task that launch `calc.exe`:
+**Atomic T1053.005, Test 1, "Scheduled Task Startup Script".** Built-in `schtasks`, creates an onlogon and an onstart task that launch `calc.exe`:
 
 ```powershell
 Invoke-AtomicTest T1053.005 -TestNumbers 1 -ShowDetailsBrief
@@ -274,7 +274,7 @@ schtasks /delete /tn "corp-update" /f
 ### What to look for
 
 WS01 **Security Event 4698** (a scheduled task was created). The decision-grade
-detail is in `win.eventdata.taskContent` — the task's embedded XML — which here
+detail is in `win.eventdata.taskContent`, the task's embedded XML, which here
 shows action `cmd.exe /c calc.exe`, principal `<UserId>S-1-5-18</UserId>`
 (SYSTEM) and a `<BootTrigger>`. Filter `data.win.system.eventID: 4698`.
 
@@ -300,8 +300,8 @@ Read the task's own XML, not just the fact that one was created. Two tiers:
 ```
 `taskContent` carries the XML HTML-entity-encoded (`&lt;Command&gt;`…), so the
 rules match the plain tokens that survive encoding (`cmd.exe`, `S-1-5-18`,
-`BootTrigger`) rather than the `<tags>`. The two-tier gate — a shell action
-*and* SYSTEM/persistence — keeps benign software-install tasks out of the
+`BootTrigger`) rather than the `<tags>`. The two-tier gate, a shell action
+*and* SYSTEM/persistence, keeps benign software-install tasks out of the
 level-12 band. **Tuning:** baseline known-good task names/paths on a clean build
 and allowlist them.
 
@@ -324,7 +324,7 @@ escalated to 100251 (S-1-5-18 + BootTrigger). Evidence: `evidence/phase4/t5-sche
 
 ## 8. Coverage matrix
 
-Fill this in as you go — it is the headline output of the phase:
+Fill this in as you go; it is the headline output of the phase:
 
 | Technique | ATT&CK | Simulated | Telemetry seen | Rule | Result |
 | --- | --- | --- | --- | --- | --- |
@@ -334,7 +334,7 @@ Fill this in as you go — it is the headline output of the phase:
 | SMB admin-share lateral | T1021.002 | yes | Security 5140 (ADMIN$/C$) | 100240 | **Detected** (level 12) |
 | Scheduled task persistence | T1053.005 | yes | Security 4698 (taskContent) | 100250/1 | **Detected** (level 12) |
 
-Result = **detected** (rule fired, low noise), **partial** (fired but noisy, or only post-hoc in archives), or **missed** (no signal — and then explain why, e.g. a control blocked it before it logged).
+Result = **detected** (rule fired, low noise), **partial** (fired but noisy, or only post-hoc in archives), or **missed** (no signal, and then explain why, e.g. a control blocked it before it logged).
 
 ---
 
@@ -343,8 +343,8 @@ Result = **detected** (rule fired, low noise), **partial** (fired but noisy, or 
 ### What I simulated and why these five
 Five techniques were chosen to walk one intrusion end to end across the ATT&CK
 tactics a Windows AD attacker actually moves through: **discovery** (T1087.002 /
-T1069.002), **credential access** by two routes — **Kerberoasting** (T1558.003)
-and **LSASS dumping** (T1003.001) — **lateral movement** (T1021.002), and
+T1069.002), **credential access** by two routes, **Kerberoasting** (T1558.003)
+and **LSASS dumping** (T1003.001), **lateral movement** (T1021.002), and
 **persistence** (T1053.005). Each was run with Atomic Red Team in the isolated
 `corp.lab` lab, one at a time, reverted after capture.
 
@@ -353,8 +353,8 @@ and **LSASS dumping** (T1003.001) — **lateral movement** (T1021.002), and
   `net1.exe`. Rule 100211 escalates only the privileged-group case to level 10,
   so routine `net` use stays quiet.
 - **Kerberoasting.** Requesting a service ticket for `svc-sql` produced Security
-  4769. Rule 100220 keys on RC4 (`0x17`) for a non-machine account — the exact
-  weak-crypto signature — and fired at level 12. (svc-sql had to be temporarily
+  4769. Rule 100220 keys on RC4 (`0x17`) for a non-machine account, the exact
+  weak-crypto signature, and fired at level 12. (svc-sql had to be temporarily
   moved off AES to reproduce the RC4 request; **revert it afterwards**.)
 - **LSASS credential access.** The comsvcs MiniDump attempt on WS01 was **blocked
   by the Phase 3 controls** (ASR + RunAsPPL) before it could touch LSASS, so no
@@ -372,9 +372,10 @@ and **LSASS dumping** (T1003.001) — **lateral movement** (T1021.002), and
 ### Where a Phase 3 control changed the picture
 The LSASS technique is the strongest result: the Phase 3 hardening **stopped the
 attack outright**, which also meant the usual telemetry (a process handle to
-LSASS) never appeared. That is the real control/detection trade-off a SOC lives
-with — a prevented attack can be an *invisible* attack. Closing the gap meant
-adding a data source (the Defender channel) so the block is also an alert. The
+LSASS) never appeared. That is the control/detection trade-off a SOC manages:
+prevention can remove the telemetry that would otherwise record the attack.
+Closing the gap meant adding a data source (the Defender channel) so the block is
+also an alert. The
 Kerberoasting and lateral-movement cases show the same theme from the other side:
 accepted weaknesses (RC4 on a service account, a Tier 0 credential on a
 workstation) are exactly what the detections are tuned to catch.
@@ -387,7 +388,7 @@ each carries a documented false-positive / allowlist note so the severity holds
 up outside the lab. Full detail per technique is in `evidence/phase4/`.
 
 ### Why a bank cares
-A SOC is judged on detection coverage against a framework like ATT&CK, not on how many alerts it has. This phase shows the full detection-engineering loop — simulate a known technique, confirm the telemetry, write and tune a rule, map it to ATT&CK, and score coverage honestly including the gaps. That, plus the hardening in Phase 3, is the "can you both reduce risk and see what you miss" story that technology risk and SOC interviews probe for.
+Detection capability is measured by coverage against a framework such as ATT&CK, not by alert volume. This phase documents the full detection-engineering cycle: simulate a known technique, confirm the telemetry it produces, write and tune a rule, map it to ATT&CK, and record coverage including the gaps. Combined with the hardening in Phase 3, it demonstrates both risk reduction and the visibility to confirm what each control does and does not stop, which is the capability technology-risk and SOC functions are accountable for.
 
 ---
 

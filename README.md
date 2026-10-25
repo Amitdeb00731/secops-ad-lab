@@ -66,7 +66,7 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 
 ### Phase 4: detection engineering (complete)
 - Five ATT&CK techniques simulated with Atomic Red Team in the isolated lab, one at a time, each detection rule tuned against a real captured event and paired with a portable Sigma rule.
-- Every technique detected at the intended severity; the LSASS dump was **blocked outright by the Phase 3 controls**, and the block was turned into its own alert after onboarding the Defender channel — the control/detection trade-off made explicit.
+- Every technique detected at the intended severity; the LSASS dump was **blocked outright by the Phase 3 controls**, and the block was turned into its own alert after onboarding the Defender channel: the control/detection trade-off made explicit.
 - Evidence: [coverage matrix](evidence/phase4/coverage-matrix.md) · [write-up](docs/04-detections.md#9-phase-4-write-up) · [rules](detections/wazuh/local_rules.xml) · [Sigma](detections/sigma/)
 
 | ATT&CK technique | Simulated with | Result | Detection |

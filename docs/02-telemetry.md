@@ -19,7 +19,7 @@
 
 Log flow: Windows event logs (Security, System, Sysmon, PowerShell) → Wazuh agent → SIEM01 on TCP 1514 → indexed → searchable in the dashboard at `https://10.10.10.20` from your laptop.
 
-**RAM:** Wazuh recommends 8 GB for 1–25 agents. On a 16 GB laptop give SIEM01 **6 GB** (DC01 3 + WS01 4 + SIEM01 6 = 13 GB). If the laptop struggles, drop WS01 to 3 GB. 4 GB is the bare minimum and the dashboard will be slow.
+**RAM:** Wazuh recommends 8 GB for 1-25 agents. On a 16 GB laptop give SIEM01 **6 GB** (DC01 3 + WS01 4 + SIEM01 6 = 13 GB). If the laptop struggles, drop WS01 to 3 GB. 4 GB is the bare minimum and the dashboard will be slow.
 
 ---
 
@@ -113,7 +113,7 @@ On SIEM01:
 curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh && sudo bash ./wazuh-install.sh -a
 ```
 
-This takes 10–20 minutes. If it stops on a hardware check because you gave it less than recommended, re-run with `-i` added at the end (ignores the check).
+This takes 10-20 minutes. If it stops on a hardware check because you gave it less than recommended, re-run with `-i` added at the end (ignores the check).
 
 At the end it prints:
 

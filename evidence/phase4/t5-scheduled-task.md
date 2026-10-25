@@ -1,7 +1,7 @@
-# T1053.005 — Scheduled task persistence
+# T1053.005: Scheduled task persistence
 
 **Date:** 2026-10-25
-**Technique:** T1053.005 — Scheduled Task/Job: Scheduled Task
+**Technique:** T1053.005, Scheduled Task/Job: Scheduled Task
 **Tactic:** Persistence (also Execution / Privilege Escalation)
 **Host:** WS01 (10.10.10.101)
 
@@ -25,12 +25,12 @@ The decision-grade detail is in `win.eventdata.taskContent`, the task's embedded
 XML (HTML-entity-encoded in the event):
 
 - Action: `<Command>cmd.exe</Command><Arguments>/c calc.exe</Arguments>`
-- Principal: `<UserId>S-1-5-18</UserId>` — the SYSTEM account
-- Trigger: `<BootTrigger>` — runs on every startup
+- Principal: `<UserId>S-1-5-18</UserId>`, the SYSTEM account
+- Trigger: `<BootTrigger>`, runs on every startup
 - Created by: `adm-t2-sokafor` (subjectUserName)
 
 Wazuh's built-in rule **60228** matched at **level 4** ("A scheduled task was
-created") — correct but too quiet, and 4698 fires for ordinary software installs
+created"), correct but too quiet, and 4698 fires for ordinary software installs
 too, so it is not actionable on its own.
 
 ## Detection

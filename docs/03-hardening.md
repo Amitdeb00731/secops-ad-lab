@@ -62,7 +62,7 @@ If the scan is old or missing, restart the agent to force a new one (SCA runs at
 | C10 | Windows LAPS for `localadmin` | Workstations | Same local admin password everywhere, so lateral movement | T1021.002, T1078.003 |
 | C11 | Print Spooler disabled on the DC | DC | Coercion and spooler exploits against the DC | T1187, T1068 |
 | C12 | LDAP signing required | DC | LDAP relay to the DC | T1557 |
-| C13 | Verify only: Defender real-time on | Both | Baseline hygiene | — |
+| C13 | Verify only: Defender real-time on | Both | Baseline hygiene | n/a |
 | C14 | Firewall on by policy, inbound block, logging | Both | Unfiltered inbound access; no firewall audit trail | T1021 |
 | C15 | SMBv1 off by policy | DC | Legacy SMB exploits | T1210 |
 | C16 | Audit account lockouts | Both | No record of lockouts from guessing | T1110 |
@@ -397,7 +397,7 @@ Banks run control frameworks (often mapped to NIST CSF or CIS Controls) and are 
 
 - [x] `p3-before-hardening` snapshot taken
 - [x] Before SCA score recorded and failed checks exported for DC01 and WS01
-- [x] `GPO-Hardening-Workstations` created, linked and verified (C1–C6, C8, C10)
+- [x] `GPO-Hardening-Workstations` created, linked and verified (C1-C6, C8, C10)
 - [x] `GPO-Hardening-DC` created, linked and verified (C11, C12)
 - [x] NTLMv2-only (C7) and Protected Users (C9) applied
 - [x] Tier 0 sign-in on WS01 refused, and the 4625 seen in Wazuh
