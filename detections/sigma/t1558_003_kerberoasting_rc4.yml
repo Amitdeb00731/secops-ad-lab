@@ -1,5 +1,5 @@
 title: Kerberoasting - RC4 Service Ticket for User Account
-id: 9b2d1a77-3f6c-4a1e-bb21-kerberoast0rc4
+id: d25e2b8c-0a2a-4af8-80ba-eaf83327c950
 status: experimental
 description: Detects a Kerberos service ticket (4769) issued with RC4 encryption for a user-context service account, the classic Kerberoasting signal. Machine accounts and krbtgt are excluded.
 references:

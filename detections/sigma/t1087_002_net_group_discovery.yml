@@ -1,5 +1,5 @@
 title: Privileged Domain Group Discovery via net group
-id: 7a1c2e40-4d3b-4e2a-9c1f-net0groupdisc01
+id: 134469de-26b0-4e64-88c1-4e10b9f55e05
 status: experimental
 description: Detects enumeration of privileged domain groups (Domain Admins, Enterprise Admins, etc.) using net.exe / net1.exe, a common early reconnaissance step.
 references:

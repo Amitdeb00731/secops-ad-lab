@@ -13,6 +13,25 @@ To demonstrate both the attack and the detection, `svc-sql` was then set to RC4 
 
 **Detection:** custom rule **100220** (level 12) - RC4 service ticket for a non-machine, non-krbtgt account. Sigma: `detections/sigma/t1558_003_kerberoasting_rc4.yml`.
 
-**Result:** _pending confirmation that 100220 fires in wazuh-alerts after deploy._
+**Result: Detected.** After deploy, the RC4 re-roast fired rule **100220 at level 12** in `wazuh-alerts-*` (2026-10-25 12:59): "Possible Kerberoasting: RC4 service ticket for account svc-sql requested by pshah@CORP.LAB", tagged T1558.003. The first (AES) attempt produced no 100220 alert, confirming the rule keys on the RC4 downgrade and that an AES-only service account is the mitigation.
+
+## Alert record (primary evidence)
+
+Decision fields from the `wazuh-alerts-*` document that rule 100220 produced:
+
+```json
+{
+  "rule": {
+    "id": "100220", "level": 12, "firedtimes": 1, "mail": true,
+    "description": "Possible Kerberoasting: RC4 service ticket for account svc-sql requested by pshah@CORP.LAB (T1558.003)",
+    "mitre": { "id": ["T1558.003"], "tactic": ["Credential Access"] }
+  },
+  "win.system.eventID": "4769",
+  "win.system.systemTime": "2026-10-25T12:59:16.0742831Z",
+  "win.system.eventRecordID": "40056",
+  "win.system.computer": "DC01.corp.lab",
+  "decoder": { "name": "windows_eventchannel" }
+}
+```
 
 **Remember to revert** `svc-sql` to AES after the phase: `Set-ADUser svc-sql -Replace @{"msDS-SupportedEncryptionTypes"=0x18}` (or document it as a standing accepted risk).

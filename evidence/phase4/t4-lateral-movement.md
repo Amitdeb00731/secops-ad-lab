@@ -73,3 +73,44 @@ admin jump host. Add an allowlist on `win.eventdata.ipAddress` (or require the
 source to be *outside* the admin tier) so day-to-day administration from the
 jump host is suppressed and only unexpected sources alert. The lab has no jump
 host, so every admin-share hit is flagged.
+
+## Regex check: what matches and what does not
+
+Rule 100240's `shareName` pattern `(?i)\\+(ADMIN|[A-Z])\$` is deliberately
+non-anchored so it matches the Wazuh-encoded share value in either `\\*\ADMIN$`
+or `\ADMIN$` form. Evaluated against the values seen in this run:
+
+| shareName value | Matches 100240 | Why |
+| --- | --- | --- |
+| `\\*\ADMIN$` | yes | `ADMIN` alternative before `$` |
+| `\\*\C$` | yes | single drive-letter `C` before `$` |
+| `\\*\IPC$` | no | `IPC` is three letters, not `ADMIN` and not a single `[A-Z]` |
+| `\\*\SYSVOL` / `\\*\NETLOGON` | no | named shares, no `$` terminator |
+
+So the rule escalates only administrative-share access and stays silent on the
+`IPC$` session setup that accompanies every SMB connection.
+
+## Alert record (primary evidence)
+
+Decision fields from the `wazuh-alerts-*` document that rule 100240 produced on
+the post-deploy run (the three 5140 records 40781-40785 above were the
+telemetry-enablement verification; the detection below fired on the ADMIN$ open at
+record 40853):
+
+```json
+{
+  "rule": {
+    "id": "100240", "level": 12, "firedtimes": 1, "mail": true,
+    "description": "Admin share \\\\*\\ADMIN$ opened on DC01.corp.lab by adm-t0-sokafor from 10.10.10.101 - possible SMB lateral movement (T1021.002)",
+    "groups": ["lateral_movement", "smb_admin_shares"],
+    "mitre": { "id": ["T1021.002"], "tactic": ["Lateral Movement"] }
+  },
+  "win.system.eventID": "5140",
+  "win.system.systemTime": "2026-10-25T14:01:27.1177421Z",
+  "win.system.eventRecordID": "40853",
+  "win.system.computer": "DC01.corp.lab",
+  "win.eventdata.ipAddress": "10.10.10.101",
+  "win.eventdata.subjectUserName": "adm-t0-sokafor",
+  "decoder": { "name": "windows_eventchannel" }
+}
+```

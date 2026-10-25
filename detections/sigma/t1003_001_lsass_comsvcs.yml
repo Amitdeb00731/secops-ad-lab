@@ -1,7 +1,12 @@
 title: LSASS Memory Dump via comsvcs.dll MiniDump
-id: 4e1b7c92-8a3d-4f10-bc55-lsasscomsvcs01
+id: 1a4927ea-741b-4432-b0b2-ae8a29e101ce
 status: experimental
-description: Detects the comsvcs.dll MiniDump LOLBIN technique used to dump LSASS memory, matched on the process command line. Catches the attempt even when LSA protection / ASR blocks the actual memory read.
+description: |
+  Detects the comsvcs.dll MiniDump LOLBIN technique used to dump LSASS memory, matched on the process command line.
+  Scope: this is a detection on process-creation telemetry, not a prevention control. It fires where the process
+  actually launches (an unhardened host, or AV disabled). On a hardened host where LSA protection / ASR or Defender
+  blocks the payload before it executes, no process-creation event is generated and this rule will not match; detect
+  that case from the EDR block event instead (lab equivalent: Wazuh rule 100231 on the Defender detection).
 references:
   - https://attack.mitre.org/techniques/T1003/001/
 author: Amit (SecOps AD lab)

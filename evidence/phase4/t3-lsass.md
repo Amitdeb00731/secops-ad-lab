@@ -25,3 +25,32 @@ After that, the re-run produced Defender **1116** (detected `Trojan:Win32/Rundll
 Sigma: `detections/sigma/t1003_001_lsass_comsvcs.yml`.
 
 **Result: Detected, and the attack was blocked.** The LSASS dump was stopped by LSA protection / ASR + Defender. Visibility was initially a gap (block not in SIEM); onboarding the Defender channel closed it, and the block now alerts at level 12 (built-in 62123, plus custom 100231). Rule 100230 covers the process-creation path for non-hardened hosts.
+
+## Event taxonomy: block vs detection
+
+The LSASS attempt surfaces across two distinct Defender event classes, which this write-up keeps separate:
+
+- **1116 / 1117 (antivirus):** 1116 = threat *detected*, 1117 = threat *remediated*. These are what the comsvcs MiniDump produced here (`Trojan:Win32/RundllLolBin.AF`), because Defender AV classified and removed the payload.
+- **1121 / 1122 (ASR):** these are the *Attack Surface Reduction* rule events (1121 = block, 1122 = audit). The ASR "block credential stealing from LSASS" rule also contributed to the prevention; on this host the AV classification (1116/1117) is the event that reached the SIEM and drove the alert.
+
+Rule 100231 keys on the Defender detection record, not on a specific event ID, so it fires on the AV path proven below.
+
+## Alert record (primary evidence)
+
+Decision fields from the `wazuh-alerts-*` document that rule 100231 produced:
+
+```json
+{
+  "rule": {
+    "id": "100231", "level": 12, "firedtimes": 1, "mail": true,
+    "description": "LSASS credential dump blocked by Defender (comsvcs MiniDump) on WS01.corp.lab - T1003.001 attempt stopped",
+    "mitre": { "id": ["T1003.001"], "tactic": ["Credential Access"] }
+  },
+  "win.system.providerName": "Microsoft-Windows-Windows Defender",
+  "win.system.eventID": "1116",
+  "win.system.systemTime": "2026-10-25T13:39:20.5024963Z",
+  "win.system.eventRecordID": "697",
+  "win.system.computer": "WS01.corp.lab",
+  "decoder": { "name": "windows_eventchannel" }
+}
+```

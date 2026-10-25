@@ -1,0 +1,42 @@
+MIT License
+
+Copyright (c) 2026 Amit Kiran Deb
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Third-party components
+
+This repository documents a lab that uses the following open-source projects.
+They are not redistributed here; they remain under their own licences and are
+credited to their authors:
+
+- sysmon-modular (Sysmon configuration) by Olaf Hartong, MIT License.
+  https://github.com/olafhartong/sysmon-modular
+- Atomic Red Team (adversary simulation tests) by Red Canary, MIT License.
+  https://github.com/redcanaryco/atomic-red-team
+- Sigma (generic detection rule format) by the SigmaHQ project,
+  Detection Rule License (DRL) 1.1 for rule content.
+  https://github.com/SigmaHQ/sigma
+- Wazuh (SIEM / XDR) by Wazuh Inc., GNU GPLv2.
+  https://github.com/wazuh/wazuh
+
+The custom Wazuh rules, Sigma rules, documentation, and reports authored for
+this project are released under the MIT License above.

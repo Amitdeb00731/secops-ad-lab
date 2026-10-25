@@ -4,7 +4,7 @@
 | --- | --- |
 | Report reference | IR-2026-001 |
 | Report date | 2026-10-25 |
-| Incident window | 2026-10-25, 13:1x to 14:11 UTC |
+| Incident window | 2026-10-25, 12:37 to 14:11 UTC |
 | Severity | High (P2) |
 | Status | Closed, contained within exercise window |
 | Affected environment | corp.lab AD domain (DC01, WS01), monitored by SIEM01 |
@@ -64,16 +64,17 @@ Detection content: custom rule set 100210 to 100251 in
 
 ## 3. Incident timeline (UTC, 2026-10-25)
 
-Timestamps and event record IDs for stages 4 and 5 are taken directly from the
-SIEM archive. Times for stages 1 to 3 are to the minute from the exercise log.
+All times and event record IDs below are taken from the alert records in
+`wazuh-alerts-*` and the underlying SIEM archive, and match the per-stage
+evidence in `evidence/phase4/`.
 
 | Seq | Time | Host | Activity | Source event | Rule | Level |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 13:18 | WS01 | Enumeration of `Domain Admins` via `net group /domain` | Sysmon 1 (net1.exe) | 100211 | 10 |
-| 2 | 13:29 | WS01/DC01 | Service ticket requested for `svc-sql`, RC4 | Security 4769 (0x17) | 100220 | 12 |
-| 3 | 13:41 | WS01 | LSASS MiniDump attempt via comsvcs.dll, blocked | Defender 1116/1117 | 100231 | 12 |
-| 4 | 13:53:25 | DC01 | ADMIN$, C$, IPC$ opened from WS01 as `adm-t0-sokafor` | Security 5140 (rec 40781/40782/40785) | 100240 | 12 |
-| 5 | 14:10:40 | WS01 | Scheduled tasks registered (SYSTEM/boot and logon) | Security 4698 (rec 35111/35109) | 100250/100251 | 12 |
+| 1 | 12:37:27 | WS01 | Enumeration of `Domain Admins` via `net group /domain` | Sysmon 1 (net1.exe, rec 19905) | 100211 | 10 |
+| 2 | 12:59:16 | WS01/DC01 | Service ticket requested for `svc-sql`, RC4 | Security 4769 (0x17, rec 40056) | 100220 | 12 |
+| 3 | 13:39:20 | WS01 | LSASS MiniDump attempt via comsvcs.dll, blocked | Defender 1116 (rec 697) | 100231 | 12 |
+| 4 | 14:01:27 | DC01 | ADMIN$, C$ opened from WS01 as `adm-t0-sokafor` | Security 5140 (rec 40853) | 100240 | 12 |
+| 5 | 14:10:40 | WS01 | Scheduled tasks registered (SYSTEM/boot and logon) | Security 4698 (rec 35111) | 100250/100251 | 12 |
 
 Detection latency across all stages was under one minute from event generation to
 alert in `wazuh-alerts-*`.
@@ -130,11 +131,14 @@ the SIEM.
 
 Using a Tier 0 credential (`adm-t0-sokafor`,
 SID `...-1107`) from WS01, the operator connected to the administrative shares on
-DC01 (`\\DC01\ADMIN$`, `\\DC01\C$`) over SMB and listed the file system. DC01
-recorded three Security Event 5140 entries (record IDs 40781, 40782, 40785) at
-13:53:25 UTC, source address 10.10.10.101, with access to `\\*\ADMIN$`, `\\*\C$`,
-and `\\*\IPC$`. Administrative-share access of this kind is the standard precursor
-to remote service creation and remote code execution against a domain controller.
+DC01 (`\\DC01\ADMIN$`, `\\DC01\C$`) over SMB and listed the file system. File
+Share auditing was first enabled and verified on DC01, which produced the initial
+5140 records (40781, 40782, 40785) across `\\*\ADMIN$`, `\\*\C$`, and `\\*\IPC$`
+from source address 10.10.10.101. After detection rule 100240 was deployed, the
+administrative-share access alert fired on the ADMIN$ open at 14:01:27 UTC
+(Security 5140, record 40853). Administrative-share access of this kind is the
+standard precursor to remote service creation and remote code execution against a
+domain controller.
 
 File Share auditing (Object Access) was enabled on DC01 to produce Event 5140.
 The native Wazuh rule (67017) logs all share access at level 3, including routine

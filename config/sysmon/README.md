@@ -2,7 +2,7 @@
 
 | Item | Value |
 | --- | --- |
-| Sysmon version | _fill in: output of `Sysmon64.exe -?` header, e.g. v15.x_ |
+| Sysmon version | Sysinternals Sysmon, v15 series (config schema 4.91) |
 | Config | [sysmon-modular](https://github.com/olafhartong/sysmon-modular) by Olaf Hartong, default `sysmonconfig.xml` (MIT licence) |
 | Downloaded | 24 October 2026, `master` branch (config schema 4.91) |
 | Installed on | DC01, WS01 (`Sysmon64.exe -accepteula -i sysmonconfig.xml`) |

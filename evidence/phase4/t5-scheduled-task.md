@@ -65,3 +65,24 @@ no shell action stops at 100250's gate and never reaches level 12.
 Legitimate installers and management agents also register SYSTEM boot tasks.
 Baseline the known-good task names and executable paths on a clean build and
 allowlist them, so 100251 fires only on tasks outside that baseline.
+
+## Alert record (primary evidence)
+
+Decision fields from the `wazuh-alerts-*` document that rule 100251 produced
+(`firedtimes: 2`, one for each of the OnStartup and OnLogon tasks):
+
+```json
+{
+  "rule": {
+    "id": "100251", "level": 12, "firedtimes": 2, "mail": true,
+    "description": "Scheduled task \\T1053_005_OnStartup persists as SYSTEM or on boot/logon and runs a shell on WS01.corp.lab - likely persistence (T1053.005)",
+    "groups": ["persistence", "scheduled_task"],
+    "mitre": { "id": ["T1053.005"], "tactic": ["Execution", "Persistence", "Privilege Escalation"] }
+  },
+  "win.system.eventID": "4698",
+  "win.system.systemTime": "2026-10-25T14:10:40.0656532Z",
+  "win.system.eventRecordID": "35111",
+  "win.system.computer": "WS01.corp.lab",
+  "decoder": { "name": "windows_eventchannel" }
+}
+```

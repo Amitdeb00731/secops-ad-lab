@@ -59,7 +59,7 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 
 ### Phase 3: hardening (complete)
 - 16 controls applied by Group Policy, each tied to the attack it stops and checked on the host.
-- CIS score measured with Wazuh SCA: DC01 29% → 38% (34 checks fixed), WS01 27% → 33% (30 fixed), no regressions.
+- CIS score measured with Wazuh SCA: DC01 29% → 38% (34 checks fixed), WS01 27% → 33% (30 fixed), no regressions. These figures are the share of CIS benchmark checks passing before and after hardening (a measure of improvement), not a claim of formal CIS compliance or certification.
 - Closes the Phase 2 finding: Tier 0 admins can no longer sign in to workstations; local admin passwords are now unique and rotated by Windows LAPS.
 - Accepted risks kept on record (weak service account and RC4 left for Phase 4).
 - Evidence: [hardening register](evidence/phase3/hardening-register.md) · [SCA comparison](evidence/phase3/sca-comparison.md) · [verification](evidence/phase3/verification.md) · [write-up](docs/03-hardening.md#8-phase-3-write-up)
@@ -112,4 +112,4 @@ Everything here runs in an isolated, self-contained lab I own. Simulations use t
 ## About me
 
 Built by **Amit Kiran Deb**, MSc graduate (results November 2026) with a background in OT security (IEC 62443, Purdue model), aiming at cyber security and technology risk roles in financial services.
-[GitHub](https://github.com/Amitdeb00731) · LinkedIn: _add link_
+[GitHub](https://github.com/Amitdeb00731) · [LinkedIn](https://www.linkedin.com/in/amit-deb-038b642b5/)
