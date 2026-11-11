@@ -11,7 +11,7 @@ description: >
 references:
   - https://attack.mitre.org/techniques/T1053/005/
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1053.005/T1053.005.md
-author: secops-ad-lab (Phase 4)
+author: secops-ad-lab
 date: 2026/10/25
 logsource:
   product: windows

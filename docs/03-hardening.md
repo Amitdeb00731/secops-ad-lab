@@ -395,6 +395,8 @@ Banks run control frameworks (often mapped to NIST CSF or CIS Controls) and are 
 
 ## Phase 3 done checklist
 
+_These boxes are an operator runbook for a reader reproducing this phase, to tick as they work through it. The as-built result is recorded in the evidence files and reports, not in these boxes._
+
 - [x] `p3-before-hardening` snapshot taken
 - [x] Before SCA score recorded and failed checks exported for DC01 and WS01
 - [x] `GPO-Hardening-Workstations` created, linked and verified (C1-C6, C8, C10)

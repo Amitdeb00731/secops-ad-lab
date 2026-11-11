@@ -20,7 +20,7 @@ It creates two tasks: `T1053_005_OnLogon` (runs at logon as the current user) an
 
 ## Telemetry
 
-Security **4698** ("a scheduled task was created") on WS01, eventRecordID 35037.
+Security **4698** ("a scheduled task was created") on WS01, eventRecordID 35111.
 The decision-grade detail is in `win.eventdata.taskContent`, the task's embedded
 XML (HTML-entity-encoded in the event):
 

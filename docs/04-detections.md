@@ -394,6 +394,8 @@ Detection capability is measured by coverage against a framework such as ATT&CK,
 
 ## Phase 4 done checklist
 
+_These boxes are an operator runbook for a reader reproducing this phase, to tick as they work through it. The as-built result is recorded in the evidence files and reports, not in these boxes. The `svc-sql` revert to AES below is left open deliberately: RC4 on that account is a documented accepted risk in the "Accepted risks" section of `evidence/phase3/hardening-register.md` so the Kerberoasting technique stays reproducible._
+
 - [ ] `p4-start` snapshot taken on all three VMs
 - [ ] Shared folder off on DC01 and WS01
 - [x] Atomic Red Team installed on WS01
