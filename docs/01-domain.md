@@ -515,6 +515,8 @@ Active Directory is the control plane for almost every internal service in a ban
 
 ## Phase 1 done checklist
 
+_These boxes are an operator runbook for a reader reproducing this phase, to tick as they work through it. The as-built result is recorded in the evidence files and reports, not in these boxes._
+
 - [ ] `corp.lab` forest up, `dcdiag` clean
 - [ ] OU tree created
 - [ ] 6 accounts with tiered admin split, 3 groups

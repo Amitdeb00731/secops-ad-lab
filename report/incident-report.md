@@ -119,9 +119,11 @@ the Attack Surface Reduction rule that blocks credential theft from LSASS, and
 LSASS configured to run as a protected process (RunAsPPL). No handle to LSASS was
 obtained and no credential material was captured.
 
-Because the technique was blocked before execution, it produced no process-access
-telemetry (Sysmon Event 10), and detection rule 100230, which targets that
-telemetry, had nothing to match. The prevention was recorded only by Microsoft
+Because Defender blocked the method before execution, the host generated no
+process-creation record (Security 4688 or Sysmon Event 1) carrying the
+`comsvcs` MiniDump command line, so detection rule 100230, which keys on that
+command line in process-creation events, had nothing to match. The prevention
+was recorded only by Microsoft
 Defender (Event 1116/1117), which at the start of the exercise was not forwarded
 to the SIEM. The Defender Operational channel was added to the agent
 configuration, after which rule 100231 (level 12) converts the Defender block

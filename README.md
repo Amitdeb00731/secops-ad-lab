@@ -74,7 +74,7 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 | T1558.003 Kerberoasting | Atomic Red Team | Detected | Wazuh 100220 (level 12) + Sigma |
 | T1003.001 LSASS Credential Dumping | Atomic Red Team | Blocked + detected | Wazuh 100231 (level 12) + Sigma |
 | T1021.002 SMB / Admin Shares | Atomic Red Team | Detected | Wazuh 100240 (level 12) + Sigma |
-| T1053.005 Scheduled Task | Atomic Red Team | Detected | Wazuh 100250/100251 (level 12) + Sigma |
+| T1053.005 Scheduled Task | Atomic Red Team | Detected | Wazuh 100250 (level 8) / 100251 (level 12) + Sigma |
 
 ### Phase 5: report (complete)
 - Incident report (IR-2026-001) consolidating the five individually run techniques into one illustrative incident timeline: per-stage findings against the captured events, ATT&CK mapping, root cause, containment and recovery, and recommendations.

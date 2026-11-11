@@ -406,6 +406,8 @@ Under the PRA/FCA operational resilience rules a firm has to detect and respond 
 
 ## Phase 2 done checklist
 
+_These boxes are an operator runbook for a reader reproducing this phase, to tick as they work through it. The as-built result is recorded in the evidence files and reports, not in these boxes._
+
 - [ ] SIEM01 built at `10.10.10.20`, disk extended, DNS record added
 - [ ] Wazuh 4.14 installed, all four services running, admin password in password manager only
 - [ ] Wazuh apt repo disabled

@@ -9,8 +9,8 @@ description: |
   that case from the EDR block event instead (lab equivalent: Wazuh rule 100231 on the Defender detection).
 references:
   - https://attack.mitre.org/techniques/T1003/001/
-author: Amit (SecOps AD lab)
-date: 2026-10-25
+author: secops-ad-lab
+date: 2026/10/25
 logsource:
   product: windows
   category: process_creation

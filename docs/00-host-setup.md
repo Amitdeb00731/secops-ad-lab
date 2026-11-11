@@ -69,16 +69,6 @@ Click **NAT Settings…** and confirm the **Gateway IP is `10.10.10.2`**. (VMwar
 
 What this gives you: VMs on VMnet10 can reach each other and the internet (for updates), and your laptop can reach them, but nothing else on your home network can. Before the Phase 4 test runs we change VMnet10 to **Host-only**, which cuts the internet route.
 
---- | --- |
-| Name | `corp-lab` |
-| IPv4 Prefix | `10.10.10.0/24` |
-| Enable DHCP | **Unticked** |
-| Enable IPv6 | Unticked |
-
-Click **Apply**.
-
-What this gives you: VMs on `corp-lab` can reach each other and the internet (for updates), but nothing on your home network can reach them. We switch to a fully isolated network before the Phase 4 test runs.
-
 ---
 
 ## 1.5 Set up your notes
@@ -111,6 +101,8 @@ git push
 ---
 
 ## Step 1 checklist
+
+_These boxes are an operator runbook for a reader reproducing this step, to tick as they work through it. The as-built result is recorded in the evidence files and reports, not in these boxes._
 
 - [ ] Virtualisation enabled; Hyper-V checked
 - [ ] `E:\VMs` and `E:\ISOs` created
