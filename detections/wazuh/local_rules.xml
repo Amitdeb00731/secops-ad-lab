@@ -18,7 +18,7 @@
     spawns net1.exe; both are logged).
   -->
   <rule id="100210" level="5">
-    <if_group>sysmon_eid1_detections</if_group>
+    <if_sid>61603</if_sid>
     <field name="win.eventdata.originalFileName" type="pcre2">(?i)^net1\.exe$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)\bgroup\b.{0,100}/domain</field>
     <description>Domain group enumeration via net group /domain by $(win.eventdata.user) on $(win.system.computer) (T1069.002)</description>

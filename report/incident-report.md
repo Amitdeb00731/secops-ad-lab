@@ -27,7 +27,9 @@ On 2026-10-25 a controlled adversary simulation was executed against the corp.la
 Active Directory domain. Beginning from an assumed foothold on a domain-joined
 workstation (WS01, 10.10.10.101), the operator executed a five-stage sequence
 covering reconnaissance, credential access, lateral movement, and persistence,
-corresponding to five MITRE ATT&CK techniques.
+corresponding to five MITRE ATT&CK techniques. Each technique was executed and
+reverted individually; they are consolidated into a single timeline here so the
+exercise reads as one incident, not as a demonstrated continuous intrusion.
 
 The Security Operations capability generated a high-severity alert for every
 stage. One of the two credential-access attempts, an attempt to read LSASS
@@ -182,7 +184,7 @@ privileged, persistent tasks. Both tasks in this exercise reached level 12.
 No credential, data, or system was compromised beyond the simulation. The
 exercise established the following about the monitored environment:
 
-- End-to-end detection coverage across the simulated kill chain, at severity
+- End-to-end detection coverage across the five simulated techniques, at severity
   levels appropriate for SOC triage.
 - One preventive control (endpoint LSASS protection) stopped the highest-impact
   credential-theft technique outright.
