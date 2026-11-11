@@ -45,9 +45,11 @@ customers or to market integrity. An attacker who gains control of the identity
 system can disrupt every service that relies on it at once, which is a direct and
 rapid route to breaching impact tolerance. The ability to prevent, detect, and
 recover from that scenario is therefore a resilience requirement in addition to a
-security one. This exercise provides evidence that the preventive and detective
-controls needed to stay within tolerance for an identity-led disruption are in
-place and were effective.
+security one. This exercise is a cyber-risk assessment informed by those
+operational resilience principles rather than a formal resilience test: it does
+not define a specific important business service or a numerical impact tolerance.
+Within that scope, it shows that the preventive and detective controls relevant to
+an identity-led disruption were exercised and were effective.
 
 ## Residual risk and recommended action
 

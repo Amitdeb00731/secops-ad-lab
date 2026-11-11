@@ -24,22 +24,21 @@ This project asks one question: **if that happened in a small corporate network,
 flowchart LR
   subgraph LAB["Isolated lab network (host-only, no internet route)"]
     DC01["DC01<br/>Windows Server 2022<br/>AD DS + DNS<br/>Sysmon + Wazuh agent"]
-    WS01["WS01<br/>Windows 11 Enterprise<br/>domain-joined<br/>Sysmon + Wazuh agent"]
+    WS01["WS01<br/>Windows 11 Enterprise<br/>domain-joined<br/>Sysmon + Wazuh agent<br/>Atomic Red Team host (Phase 4)"]
     SIEM01["SIEM01<br/>Wazuh all-in-one<br/>indexer · server · dashboard"]
-    TEST01["TEST01<br/>Linux test box<br/>on only during test runs"]
+    TEST01["TEST01<br/>Linux attacker box (reserved)<br/>not used for the Phase 4 runs"]
   end
   WS01 -- "Kerberos / LDAP / SMB" --> DC01
   DC01 -- "logs (agent)" --> SIEM01
   WS01 -- "logs (agent)" --> SIEM01
-  TEST01 -. "simulated activity" .-> WS01
 ```
 
 | Host | Role | OS | RAM |
 | --- | --- | --- | --- |
 | DC01 | Domain controller, DNS | Windows Server 2022 (evaluation) | 3 GB |
 | WS01 | User workstation | Windows 11 Enterprise (evaluation) | 4 GB |
-| SIEM01 | Log collection, detection, dashboards | Wazuh on Ubuntu | 4 GB |
-| TEST01 | Simulation host | Linux | 2 GB |
+| SIEM01 | Log collection, detection, dashboards | Wazuh on Ubuntu | 6 GB |
+| TEST01 | Attacker box, reserved (not used for the Phase 4 runs) | Linux | 2 GB |
 
 All VMs run on a single 16 GB laptop on a host-only network, with clean snapshots for rollback.
 
@@ -58,14 +57,14 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 - Evidence: [coverage](evidence/phase2/telemetry-coverage.md) · [write-up](docs/02-telemetry.md#10-phase-2-write-up) · [agent config](config/wazuh/agent.conf) · [Sysmon config](config/sysmon/README.md)
 
 ### Phase 3: hardening (complete)
-- 16 controls applied by Group Policy, each tied to the attack it stops and checked on the host.
+- 16 hardening controls applied and checked on the host, 15 enforced by Group Policy and Microsoft Defender real-time protection confirmed on by operating-system default.
 - CIS score measured with Wazuh SCA: DC01 29% → 38% (34 checks fixed), WS01 27% → 33% (30 fixed), no regressions. These figures are the share of CIS benchmark checks passing before and after hardening (a measure of improvement), not a claim of formal CIS compliance or certification.
 - Closes the Phase 2 finding: Tier 0 admins can no longer sign in to workstations; local admin passwords are now unique and rotated by Windows LAPS.
 - Accepted risks kept on record (weak service account and RC4 left for Phase 4).
 - Evidence: [hardening register](evidence/phase3/hardening-register.md) · [SCA comparison](evidence/phase3/sca-comparison.md) · [verification](evidence/phase3/verification.md) · [write-up](docs/03-hardening.md#8-phase-3-write-up)
 
 ### Phase 4: detection engineering (complete)
-- Five ATT&CK techniques simulated with Atomic Red Team in the isolated lab, one at a time, each detection rule tuned against a real captured event and paired with a portable Sigma rule.
+- Five ATT&CK techniques simulated with Atomic Red Team in the isolated lab, one at a time, each detection rule tuned against a real captured event and paired with a portable Sigma rule. The runs were executed locally on WS01 (the Atomic Red Team host), so they exercise endpoint controls and telemetry rather than remote, network-originated attack traffic.
 - Every technique detected at the intended severity; the LSASS dump was **blocked outright by the Phase 3 controls**, and the block was turned into its own alert after onboarding the Defender channel: the control/detection trade-off made explicit.
 - Evidence: [coverage matrix](evidence/phase4/coverage-matrix.md) · [write-up](docs/04-detections.md#9-phase-4-write-up) · [rules](detections/wazuh/local_rules.xml) · [Sigma](detections/sigma/)
 
@@ -78,7 +77,7 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 | T1053.005 Scheduled Task | Atomic Red Team | Detected | Wazuh 100250/100251 (level 12) + Sigma |
 
 ### Phase 5: report (complete)
-- Incident report (IR-2026-001) covering the five techniques as a single intrusion: timeline, per-stage findings against the captured events, ATT&CK mapping, root cause, containment and recovery, and recommendations.
+- Incident report (IR-2026-001) consolidating the five individually run techniques into one illustrative incident timeline: per-stage findings against the captured events, ATT&CK mapping, root cause, containment and recovery, and recommendations.
 - One-page business summary framed against UK operational resilience (PRA/FCA important business services and impact tolerances) for a non-technical risk audience.
 - Evidence: [incident report](report/incident-report.md) · [business companion](report/business-companion.md) · [index](report/README.md)
 

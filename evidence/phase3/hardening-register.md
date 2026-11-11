@@ -5,7 +5,7 @@ One line per control: what is set, where, why, and how it was verified. Status: 
 | # | Control | Setting | Applied by | Scope | Risk reduced | ATT&CK | Verified by | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | C1 | LLMNR off | `EnableMulticast = 0` | GPO-Hardening-Workstations, GPO-Hardening-DC | Both | Hash capture by name poisoning | T1557.001 | Registry value | Verified (SCA) |
-| C2 | NetBIOS name resolution off | `NetBT NodeType = 2` | GPO-Hardening-Workstations, GPO-Hardening-DC | Both | Hash capture via NBT-NS | T1557.001 | Registry value | Verified (SCA) |
+| C2 | NetBIOS broadcast name resolution off | `NetBT NodeType = 2` | GPO-Hardening-Workstations, GPO-Hardening-DC | Both | Hash capture via NBT-NS | T1557.001 | Registry value | Verified (SCA) |
 | C3 | WDigest off | `UseLogonCredential = 0` | GPO-Hardening-Workstations | Workstations | Clear-text passwords in LSASS memory | T1003.001 | Registry value | Verified (already compliant; CIS check passed before and after) |
 | C4 | LSA protection | `RunAsPPL = 2` (no UEFI lock) | GPO-Hardening-Workstations | WS01 | LSASS memory reads | T1003.001 | Wininit event 12 | Verified |
 | C5 | ASR: block LSASS credential stealing | Rule `9e6c4e1f-...-a39ef669e4b2` = Block | GPO-Hardening-Workstations, GPO-Hardening-DC | Both | LSASS memory reads | T1003.001 | `Get-MpPreference` | Verified (SCA) |
@@ -16,7 +16,7 @@ One line per control: what is set, where, why, and how it was verified. Status: 
 | C10 | Windows LAPS | `localadmin`, 15 chars, 30 days, backup to AD, encrypted, reset 8 h after use | GPO-Hardening-Workstations | Workstations | Shared local admin password | T1021.002, T1078.003 | `Get-LapsADPassword` metadata | Verified |
 | C11 | Print Spooler off on DC | Service disabled | GPO-Hardening-DC | DC | Coercion and spooler exploits | T1187, T1068 | `Get-Service Spooler` | Verified |
 | C12 | LDAP signing required | Require signing | GPO-Hardening-DC | DC | LDAP relay | T1557 | `LDAPServerIntegrity = 2` | Verified |
-| C13 | Defender on | Real-time protection on | Windows default | Both | General exposure | n/a | `Get-MpComputerStatus` | Planned |
+| C13 | Defender on | Real-time protection on | Windows default | Both | General exposure | n/a | `Get-MpComputerStatus` | Verified (OS default, verify-only) |
 | C14 | Firewall by policy | On, inbound block, logging dropped and allowed, 16 MB | GPO-Hardening-Workstations, GPO-Hardening-DC | Both | Unfiltered inbound; no firewall audit trail | T1021 | `Get-NetFirewallProfile -PolicyStore ActiveStore` | Verified (SCA) |
 | C15 | SMBv1 off by policy | `mrxsmb10 Start = 4`, `SMB1 = 0` | GPO-Hardening-DC | DC | Legacy SMB exploits | T1210 | Registry values | Verified (SCA) |
 | C16 | Audit account lockouts | Logon/Logoff → Account Lockout: Failure | GPO-Audit-Baseline | Both | No lockout records | T1110 | `auditpol` | Verified |

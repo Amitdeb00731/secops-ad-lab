@@ -116,7 +116,7 @@ Invoke-AtomicTest T1558.003 -TestNumbers 5
 Because you want the signal to land on `svc-sql` specifically, also request that one ticket by hand (no tooling, no download):
 ```powershell
 Add-Type -AssemblyName System.IdentityModel
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/dc01.corp.lab:1433"
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/srv01.corp.lab:1433"
 ```
 Use the exact SPN you set on `svc-sql` in Phase 1. If it is registered against a different host or port, adjust the argument to match.
 
