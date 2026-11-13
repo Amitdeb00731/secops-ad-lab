@@ -1,0 +1,172 @@
+========================================================================
+file          : sample-10026.eml
+date          : Mon, 30 Mar 2026 17:45:19 +0000
+subject        : Terms Update Effective Mon, March 30, 2026
+display name  : Ꮇ󠄹󠄹icroso󠄹f󠄹󠄹t Ꮇ󠄹󠄹ail Supports
+  WARNING non-ASCII in display name: U+13B7 U+E0139 U+E0139 U+E0139 U+E0139 U+E0139 U+13B7 U+E0139 U+E0139
+envelope from : co[@]brighthomedaycare[.]com   (domain: brighthomedaycare[.]com)
+return-path   : co[@]brighthomedaycare[.]com
+reply-to      : (none)
+auth          : spf=pass  dkim=pass  dmarc=bestguesspass
+  spf domain  : ['brighthomedaycare[.]com']
+  dkim d=     : ['brighthomedaycare[.]com']
+links (1)     :
+   - www[.]v2[.]brighthomedaycare[.]com
+attachments (3):
+   - emails-quarksseg.mobileconfig  [application/octet-stream, 5396 bytes]
+     sha256: 8c0013f6ee4fe229f567469ed3f1bdaf2ee6a7a4b39a04ed28df38fa25287dfb
+   - carddav-quarksseg.mobileconfig  [application/octet-stream, 5230 bytes]
+     sha256: 783cdb7425fbc29f5e35801d38a4782040da7f50e74d78de4b56eaa532eda82a
+   - caldav-quarksseg.mobileconfig  [application/octet-stream, 6350 bytes]
+     sha256: ee8f15128560c2b2b4ee242026b2a2880ee604fe8489abb999ac43c969cfcdce
+========================================================================
+file          : sample-10010.eml
+date          : Wed, 01 Apr 2026 22:05:26 +0000
+subject        : Your payment could be returned as ...
+display name  : Get Your YETI Beach Lounge Wagon #87
+envelope from : Indiamoveasone[@]procam[.]in   (domain: procam[.]in)
+return-path   : 0101019d4b1479a3-269efb56-d4f9-41b1-9f2d-ff3f851d0d4a-000000[@]us-west-2[.]amazonses[.]com
+reply-to      : feedback-ewek16yugnxu4v[@]listmanage1[.]com
+auth          : spf=pass  dkim=pass  dmarc=pass
+  spf domain  : ['us-west-2[.]amazonses[.]com']
+  dkim d=     : ['procam[.]in', 'amazonses[.]com']
+links (2)     :
+   - 23nbpth9[.]r[.]us-west-2[.]awstrack[.]me
+   - www[.]njm[.]com
+attachments (1):
+   - phishing@pot.pdf  [application/pdf, 18354 bytes]
+     sha256: 3351250345e4b65b906dd100aef7aafed2b4560c59f881d5112cb24acc661735
+========================================================================
+file          : sample-1481.eml
+date          : Mon, 21 Aug 2023 22:51:56 -0700
+subject        : Cópia de confirmação de EFT de pagamento 099DA 21 Aug 2023
+display name  : confirmação de pagamento eletrônico rodrigo-f-p
+  WARNING non-ASCII in display name: U+00E7 U+00E3 U+00F4
+envelope from : s[.]elizab198[@]outlook[.]com   (domain: outlook[.]com)
+return-path   : s[.]elizab198[@]outlook[.]com
+reply-to      : (none)
+auth          : spf=pass  dkim=pass  dmarc=pass
+  spf domain  : ['outlook[.]com']
+  dkim d=     : ['outlook[.]com']
+links (0)     :
+attachments (1):
+   - Confirmação de pagamento.html  [text/html, 17792 bytes]
+     sha256: 6f34703473559c68930f4cbac8375626cadb53341bfdd623b099c37acdcacdbf
+========================================================================
+file          : sample-10064.eml
+date          : Thu, 16 Apr 2026 11:42:51 +0000
+subject        : ⚠️ FINAL NOTICE: Your photos and files are scheduled for deletion - (OFU-104676) ❗
+display name  : Cloud Services
+envelope from : hello[@]CloudServicesi7t[.]com   (domain: CloudServicesi7t[.]com)
+return-path   : t0u2va7hed[@]terbsx[.]onmicrosoft[.]com
+reply-to      : (none)
+auth          : spf=pass  dkim=none  dmarc=none
+  spf domain  : ['terbsx[.]onmicrosoft[.]com']
+  dkim d=     : ['none']
+  NOTE: DKIM signing domain does not align with the From domain
+links (1)     :
+   - 013764637242
+attachments (0):
+========================================================================
+file          : sample-10012.eml
+date          : Wed, 01 Apr 2026 19:38:51 +0000
+subject        : Reminder: Your Service Plan Renewal is Approaching
+display name  : Sharonda Vargas
+envelope from : sharondava260231268[@]dfaar[.]com   (domain: dfaar[.]com)
+return-path   : sharondava260231268[@]dfaar[.]com
+reply-to      : sharondava260231268[@]dfaar[.]com
+auth          : spf=none  dkim=pass  dmarc=none
+  spf domain  : ['dfaar[.]com']
+  dkim d=     : ['google[.]com', 'dfaar-com[.]20230601[.]gappssmtp[.]com']
+  NOTE: DKIM signing domain does not align with the From domain
+links (3)     :
+   - www[.]w3[.]org
+   - fonts[.]gstatic[.]com
+   - schema[.]org
+attachments (0):
+========================================================================
+file          : sample-10167.eml
+date          : Tue, 19 May 2026 17:20:00 -0700
+subject        : Action Required: Confirm Your Payment Details
+display name  : Lucky7even Confirmation
+envelope from : nova[.]smith[@]entreprise123excv12[.]onmicrosoft[.]com   (domain: entreprise123excv12[.]onmicrosoft[.]com)
+return-path   : nova[.]smith[@]entreprise123excv12[.]onmicrosoft[.]com
+reply-to      : (none)
+auth          : spf=fail  dkim=pass  dmarc=none
+  spf domain  : ['entreprise123excv12[.]onmicrosoft[.]com']
+  dkim d=     : ['entreprise123excv12-onmicrosoft-com[.]20251104[.]gappssmtp[.]com']
+  NOTE: DKIM signing domain does not align with the From domain
+links (2)     :
+   - woondsplay[.]com
+   - i[.]imgur[.]com
+attachments (2):
+   - Lucky7  [image/jpeg, 5661 bytes]
+     sha256: a3b69b8248b6a47ed268bc501adffac16555266a3e64248e1ba9d3528d8f186c
+   - Welcome Bonus  [image/jpeg, 128039 bytes]
+     sha256: d95676deac69a0ca1b9dcb253a514214733aa4cfcc9f8b4685a92d4d4b4604de
+========================================================================
+file          : sample-10006.eml
+date          : Mon, 19 Jun 2023 06:07:57 +0000
+subject        : Someone tried to Iog in To Your Account, User lD : phishing@pot
+display name  : Facebook
+envelope from :    (domain: )
+return-path   : bounce[@]inventorecfety[.]co[.]uk
+reply-to      : solutionteam-recognizd23[@]hotmail[.]com
+auth          : spf=none  dkim=none  dmarc=none
+  spf domain  : ['inventorecfety[.]co[.]uk']
+  dkim d=     : ['none']
+links (4)     :
+   - www[.]facebook[.]com
+   - static[.]xx[.]fbcdn[.]net
+   - scontent[.]xx[.]fbcdn[.]net
+   - thebandalisty[.]com
+attachments (0):
+========================================================================
+file          : sample-10032.eml
+date          : Fri, 03 Apr 2026 13:29:06 +0100
+subject        : ACTIE VEREIST: ADRESBEVESTIGING NODIG  🚨
+display name  : FedEx ✔️
+  WARNING non-ASCII in display name: U+2714 U+FE0F
+envelope from : no-reply[@]gojjvyaogmvjsg   (domain: gojjvyaogmvjsg)
+return-path   : 
+reply-to      : reply-RDZJ2B8N3BEG453RUF95R45R[@]in2[.]getdrip[.]com
+auth          : spf=none  dkim=none  dmarc=none
+  spf domain  : (none)
+  dkim d=     : ['none']
+  NOTE: DKIM signing domain does not align with the From domain
+links (2)     :
+   - www[.]w3[.]org
+   - kyempapu[.]org
+attachments (0):
+========================================================================
+file          : sample-5585.eml
+date          : Thu, 23 Feb 2023 00:45:33 +0000
+subject        : You Have New Message In The Attached file
+display name  : non-reply
+envelope from : admin[@]ironville[.]com   (domain: ironville[.]com)
+return-path   : bounce-mc[.]us3_87409022[.]165552304726566322-999977536528[@]mail201[.]wdc02[.]mcdlv[.]net
+reply-to      : newsletter[@]ironville[.]com
+auth          : spf=fail  dkim=fail  dmarc=none
+  spf domain  : ['mail201[.]wdc02[.]mcdlv[.]net']
+  dkim d=     : ['mailchimpapp[.]net']
+  NOTE: DKIM signing domain does not align with the From domain
+links (0)     :
+attachments (1):
+   - Email.htm  [text/htm, 10891 bytes]
+     sha256: e282ff7cc546ba843c6f957e4098db542cbd3ddf95257fd1c912dbfceb9f935c
+========================================================================
+file          : sample-12184.eml
+date          : Wed, 26 Jul 2023 01:28:42 +0000
+subject        : [Aܿlܿeܿrt] Coܿnfܿiܿrm yoܿur iܿnfo is rܿeqܿuiredܿ [Cܿaܿse ID 153465]
+display name  : support@mail.coinbase.com
+envelope from : mssggeauthencti-cbspprt-325937197367[@]medisept[.]com[.]au   (domain: medisept[.]com[.]au)
+return-path   : mssggeauthencti-cbspprt-325937197367[@]medisept[.]com[.]au
+reply-to      : (none)
+auth          : spf=none  dkim=none  dmarc=none
+  spf domain  : ['medisept[.]com[.]au']
+  dkim d=     : ['none']
+  NOTE: DKIM signing domain does not align with the From domain
+links (0)     :
+attachments (1):
+   - Coinbase -15392.docx  [application/vnd.openxmlformats-officedocument.wordprocessingml.document, 17627 bytes]
+     sha256: a1790a4e09be26f1824f27118b12547f5ea097883f15029532bfc2d1d6610fc4
