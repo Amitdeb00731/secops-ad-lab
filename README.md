@@ -81,6 +81,12 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 - One-page business summary framed against UK operational resilience (PRA/FCA important business services and impact tolerances) for a non-technical risk audience.
 - Evidence: [incident report](report/incident-report.md) · [business companion](report/business-companion.md) · [index](report/README.md)
 
+### Analyst module: phishing triage (added)
+- A self-contained SOC-analyst module covering the stage before the domain attacks above: initial access by email. It triages ten real phishing samples end to end, from the `Authentication-Results` headers to the payload, with a repeatable method, a decision tree and a reusable read-only triage tool.
+- The ten samples span the full authentication range: the three that authenticate perfectly (SPF, DKIM and DMARC all pass) are as hostile as the four that fail, which makes the point that email authentication proves provenance, not safety.
+- Real samples from a public, citable dataset; every indicator defanged; no live attachment or `.eml` re-hosted. Mapped to ATT&CK T1566 and tied back to the lab's own credential-access and lateral-movement detections.
+- Start here: [phishing-triage/](phishing-triage/) · [methodology](phishing-triage/methodology.md) · [ATT&CK and resilience mapping](phishing-triage/mapping.md)
+
 ## Roadmap
 
 - [x] **Phase 1: Domain.** DC, OUs, tiered users and groups, workstation joined, baseline GPOs. → [docs/01-domain.md](docs/01-domain.md)
@@ -88,6 +94,7 @@ All VMs run on a single 16 GB laptop on a host-only network, with clean snapshot
 - [x] **Phase 3: Hardening.** CIS baseline scan, remediation, before/after score. → [docs/03-hardening.md](docs/03-hardening.md)
 - [x] **Phase 4: Simulate and detect.** Five ATT&CK techniques, Wazuh and Sigma rules, coverage matrix. → [docs/04-detections.md](docs/04-detections.md)
 - [x] **Phase 5: Report.** Incident report and business companion. → [report/](report/) ([incident report](report/incident-report.md) · [business companion](report/business-companion.md))
+- [x] **Analyst module: Phishing triage.** Ten real samples triaged end to end, with a repeatable method and a read-only tool. → [phishing-triage/](phishing-triage/)
 
 Planned extensions: a second workstation, CI linting of Sigma rules, and an isolated OT/building-systems subnet for an IT-to-OT segmentation study.
 
@@ -101,6 +108,7 @@ Planned extensions: a second workstation, CI linting of Sigma rules, and an isol
 ├─ config/        Sysmon config, audit policy, GPO exports
 ├─ evidence/      screenshots
 ├─ report/        incident report, business companion
+├─ phishing-triage/  analyst module: ten real samples triaged, method, tool
 └─ lab-notes.md   what broke and how I fixed it
 ```
 
